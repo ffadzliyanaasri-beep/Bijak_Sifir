@@ -1,206 +1,266 @@
 <!DOCTYPE html>
-<html>
+<html lang="ms">
 <head>
 <meta charset="UTF-8">
 <title>Bijak Sifir 2025</title>
+
 <style>
 body{
     font-family: Arial;
     text-align:center;
-    background:#f4f6ff;
+    margin:0;
+    background-size:cover;
+    background-position:center;
 }
+
 .container{
-    width:600px;
+    width:500px;
     margin:auto;
-    margin-top:30px;
+    padding:20px;
+    background:rgba(255,255,255,0.85);
+    min-height:100vh;
 }
+
 button{
-    padding:10px 20px;
+    padding:10px 15px;
     margin:5px;
     font-size:16px;
     cursor:pointer;
 }
+
 .choice{
     width:45%;
-    margin:10px;
 }
-.correct{background:#a8ffb0;}
-.wrong{background:#ffb0b0;}
-.hidden{display:none;}
+
+.correct{ background:#b6ffb6; }
+.wrong{ background:#ffaaaa; }
+
+.hidden{ display:none; }
 </style>
 </head>
 <body>
 
 <div class="container">
 
-<h1>🎮 Permainan Bijak Sifir</h1>
+<h1>Permainan Bijak Sifir</h1>
 
 <div id="menu">
-<input type="text" id="nama" placeholder="Masukkan Nama"><br><br>
-<button onclick="mulaGame(1)">Bahagian 1 (Sifir)</button>
-<button onclick="mulaGame(2)">Bahagian 2 (Tukar Unit)</button>
-<button onclick="mulaGame(3)">Bahagian 3 (Masalah)</button><br><br>
-<button onclick="lihatLeaderboard()">Leaderboard</button>
+    <input type="text" id="nama" placeholder="Masukkan Nama"><br><br>
+    <button onclick="startGame(1)">Bahagian 1 (Sifir)</button>
+    <button onclick="startGame(2)">Bahagian 2 (Tukar Unit)</button>
+    <button onclick="startGame(3)">Bahagian 3 (Masalah)</button>
+    <br><br>
+    <button onclick="showLeaderboard()">Lihat Leaderboard</button>
 </div>
 
 <div id="game" class="hidden">
-<h3 id="info"></h3>
-<h2 id="soalan"></h2>
+    <h3 id="player"></h3>
+    <h3 id="bahagianText"></h3>
+    <p id="questionNo"></p>
+    <h2 id="question"></h2>
 
-<div>
-<button class="choice" onclick="jawab(0)"></button>
-<button class="choice" onclick="jawab(1)"></button><br>
-<button class="choice" onclick="jawab(2)"></button>
-<button class="choice" onclick="jawab(3)"></button>
+    <div>
+        <button class="choice" onclick="answer(0)" id="btn0"></button>
+        <button class="choice" onclick="answer(1)" id="btn1"></button><br>
+        <button class="choice" onclick="answer(2)" id="btn2"></button>
+        <button class="choice" onclick="answer(3)" id="btn3"></button>
+    </div>
+
+    <h3 id="timer">Masa: 0s</h3>
+    <h3 id="score">Skor: 0</h3>
+    <p id="status"></p>
 </div>
 
-<p id="status"></p>
-<p id="timer"></p>
-<p id="skor"></p>
+<div id="result" class="hidden">
+    <h2>🎉 Tamat Permainan 🎉</h2>
+    <h3 id="finalScore"></h3>
+    <button onclick="location.reload()">Main Semula</button>
+    <button onclick="showLeaderboard()">Leaderboard</button>
 </div>
 
-<div id="result" class="hidden"></div>
+<div id="leaderboard" class="hidden">
+    <h2>🏆 Leaderboard</h2>
+    <div id="leaderboardList"></div>
+    <button onclick="location.reload()">Kembali</button>
+</div>
 
 </div>
+
+<!-- AUDIO FILES -->
+<audio id="bgMusic" src="detective-story-224266.mp3" loop></audio>
+<audio id="correctSound" src="correct-356013.mp3"></audio>
+<audio id="wrongSound" src="wrong-47985.mp3"></audio>
 
 <script>
 
+// FILE BACKGROUND
+const MAIN_BG = "main background.jpg";
+const BG_B1 = "first background.jpg";
+const BG_B2 = "second background.jpg";
+const BG_B3 = "Escuela.jpg";
+
 let nama="";
 let bahagian=1;
-let skor=0;
-let soalanKe=0;
-let jawapanBetul=0;
-let pilihan=[];
-let timerInterval;
-let masaMula=0;
+let score=0;
+let questionCount=0;
+let correctAnswer=0;
+let timer;
+let startTime;
 
-function mulaGame(b){
-nama=document.getElementById("nama").value;
-if(nama==""){alert("Masukkan nama dahulu"); return;}
-bahagian=b;
-skor=0;
-soalanKe=0;
-document.getElementById("menu").classList.add("hidden");
-document.getElementById("result").classList.add("hidden");
-document.getElementById("game").classList.remove("hidden");
-soalanSeterusnya();
+function setBackground(img){
+    document.body.style.backgroundImage = `url('${img}')`;
 }
 
-function soalanSeterusnya(){
-soalanKe++;
-if(soalanKe>10){ tamatGame(); return;}
+setBackground(MAIN_BG);
 
-document.getElementById("info").innerHTML=
-"Nama: "+nama+" | Bahagian "+bahagian+" | Soalan "+soalanKe+"/10";
+function startGame(b){
 
-let q=janaSoalan();
-jawapanBetul=q.jawapan;
-pilihan=q.pilihan;
+    nama=document.getElementById("nama").value;
+    if(nama==""){
+        alert("Masukkan nama dulu!");
+        return;
+    }
 
-document.getElementById("soalan").innerHTML=q.teks;
+    bahagian=b;
+    score=0;
+    questionCount=0;
 
-let btn=document.getElementsByClassName("choice");
-for(let i=0;i<4;i++){
-btn[i].innerHTML=pilihan[i];
-btn[i].className="choice";
+    if(b==1) setBackground(BG_B1);
+    if(b==2) setBackground(BG_B2);
+    if(b==3) setBackground(BG_B3);
+
+    document.getElementById("bgMusic").play();
+
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("game").classList.remove("hidden");
+
+    document.getElementById("player").innerText="Pemain: "+nama;
+
+    nextQuestion();
 }
 
-document.getElementById("status").innerHTML="";
-document.getElementById("skor").innerHTML="Skor: "+skor;
+function nextQuestion(){
+    questionCount++;
+    if(questionCount>10){
+        endGame();
+        return;
+    }
 
-masaMula=Date.now();
-timerInterval=setInterval(updateTimer,100);
+    document.getElementById("questionNo").innerText="Soalan "+questionCount+"/10";
+    document.getElementById("status").innerText="";
+    document.getElementById("score").innerText="Skor: "+score;
+
+    generateQuestion();
+
+    startTime=Date.now();
+    timer=setInterval(()=>{
+        let t=(Date.now()-startTime)/1000;
+        document.getElementById("timer").innerText="Masa: "+t.toFixed(1)+"s";
+    },100);
 }
 
-function updateTimer(){
-let t=(Date.now()-masaMula)/1000;
-document.getElementById("timer").innerHTML="Masa: "+t.toFixed(1)+"s";
+function generateQuestion(){
+
+    let question="";
+    let choices=[];
+
+    if(bahagian==1){
+        let a=Math.floor(Math.random()*11)+2;
+        let b=Math.floor(Math.random()*11)+2;
+        correctAnswer=a*b;
+        question=a+" × "+b+" = ?";
+    }
+    else if(bahagian==2){
+        let kg=Math.floor(Math.random()*10)+1;
+        correctAnswer=kg*1000;
+        question=kg+" kg = ? g";
+    }
+    else{
+        correctAnswer=7;
+        question="Sofia cuti 3 hari dan 4 hari lagi. Berapa jumlah hari?";
+    }
+
+    choices=[correctAnswer];
+
+    while(choices.length<4){
+        let fake=correctAnswer+Math.floor(Math.random()*10)-5;
+        if(fake>0 && !choices.includes(fake)){
+            choices.push(fake);
+        }
+    }
+
+    choices.sort(()=>Math.random()-0.5);
+
+    document.getElementById("question").innerText=question;
+
+    for(let i=0;i<4;i++){
+        let btn=document.getElementById("btn"+i);
+        btn.innerText=choices[i];
+        btn.className="choice";
+    }
 }
 
-function jawab(i){
-clearInterval(timerInterval);
-let btn=document.getElementsByClassName("choice");
-if(pilihan[i]==jawapanBetul){
-skor++;
-btn[i].classList.add("correct");
-document.getElementById("status").innerHTML="Betul!";
-}else{
-btn[i].classList.add("wrong");
-document.getElementById("status").innerHTML="Salah! Jawapan: "+jawapanBetul;
-}
-document.getElementById("skor").innerHTML="Skor: "+skor;
-setTimeout(soalanSeterusnya,1500);
+function answer(index){
+
+    clearInterval(timer);
+
+    let user=parseFloat(document.getElementById("btn"+index).innerText);
+
+    if(user==correctAnswer){
+        score++;
+        document.getElementById("correctSound").play();
+        document.getElementById("status").innerText="Betul ✔";
+        document.getElementById("btn"+index).classList.add("correct");
+    }else{
+        document.getElementById("wrongSound").play();
+        document.getElementById("status").innerText="Salah ❌ (Betul: "+correctAnswer+")";
+        document.getElementById("btn"+index).classList.add("wrong");
+    }
+
+    setTimeout(nextQuestion,1500);
 }
 
-function tamatGame(){
-document.getElementById("game").classList.add("hidden");
-document.getElementById("result").classList.remove("hidden");
-document.getElementById("result").innerHTML=
-"<h2>🎉 Tamat!</h2>"+
-"<p>"+nama+", skor anda: "+skor+"/10</p>"+
-"<button onclick='simpanLeaderboard()'>Simpan</button><br><br>"+
-"<button onclick='location.reload()'>Menu Utama</button>";
+function endGame(){
+
+    document.getElementById("bgMusic").pause();
+
+    saveLeaderboard();
+
+    document.getElementById("game").classList.add("hidden");
+    document.getElementById("result").classList.remove("hidden");
+
+    document.getElementById("finalScore").innerText=
+        nama+", skor anda: "+score+"/10";
+
+    setBackground(MAIN_BG);
 }
 
-function simpanLeaderboard(){
-let data=JSON.parse(localStorage.getItem("leaderboard")||"[]");
-data.push({nama:nama, skor:skor, bahagian:bahagian});
-data.sort((a,b)=>b.skor-a.skor);
-localStorage.setItem("leaderboard",JSON.stringify(data));
-alert("Disimpan!");
+function saveLeaderboard(){
+    let data=JSON.parse(localStorage.getItem("leaderboard")) || [];
+    data.push({nama:nama, skor:score, bahagian:bahagian});
+    data.sort((a,b)=>b.skor-a.skor);
+    localStorage.setItem("leaderboard",JSON.stringify(data));
 }
 
-function lihatLeaderboard(){
-let data=JSON.parse(localStorage.getItem("leaderboard")||"[]");
-let html="<h2>Leaderboard</h2>";
-data.slice(0,10).forEach((d,i)=>{
-html+=(i+1)+". "+d.nama+" - "+d.skor+
-" (Bahagian "+d.bahagian+")<br>";
-});
-html+="<br><button onclick='location.reload()'>Kembali</button>";
-document.getElementById("menu").classList.add("hidden");
-document.getElementById("result").classList.remove("hidden");
-document.getElementById("result").innerHTML=html;
-}
+function showLeaderboard(){
 
-/* GENERATOR SOALAN */
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("result").classList.add("hidden");
+    document.getElementById("leaderboard").classList.remove("hidden");
 
-function janaSoalan(){
-if(bahagian==1) return sifir();
-if(bahagian==2) return tukarUnit();
-return masalah();
-}
+    let data=JSON.parse(localStorage.getItem("leaderboard")) || [];
 
-function sifir(){
-let a=Math.floor(Math.random()*11)+2;
-let b=Math.floor(Math.random()*11)+2;
-let jawapan=a*b;
-return binaPilihan(a+" × "+b+" = ?",jawapan);
-}
+    let html="";
+    data.slice(0,10).forEach((d,i)=>{
+        html+=`${i+1}. ${d.nama} - ${d.skor} (Bahagian ${d.bahagian})<br>`;
+    });
 
-function tukarUnit(){
-let kg=Math.floor(Math.random()*10)+1;
-let jawapan=kg*1000;
-return binaPilihan(kg+" kg = ? g",jawapan);
-}
-
-function masalah(){
-let jawapan=24;
-return binaPilihan(
-"Bekalan air 6000L guna 250L sehari. Berapa hari?",
-jawapan);
-}
-
-function binaPilihan(teks,jawapan){
-let arr=[jawapan];
-while(arr.length<4){
-let r=jawapan+Math.floor(Math.random()*20)-10;
-if(r>0 && !arr.includes(r)) arr.push(r);
-}
-arr.sort(()=>Math.random()-0.5);
-return {teks:teks,jawapan:jawapan,pilihan:arr};
+    document.getElementById("leaderboardList").innerHTML=html;
 }
 
 </script>
 </body>
 </html>
+
+
+
