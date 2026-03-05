@@ -45,6 +45,18 @@
     position: relative;
   }
 
+  /* Background overlay so text stays readable */
+  #app::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.82);
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 24px;
+  }
+  .screen, #app > * { position: relative; z-index: 1; }
+
   /* SCREENS */
   .screen { display: none; padding: 20px; animation: fadeIn .3s ease; }
   .screen.active { display: block; }
@@ -532,6 +544,45 @@
 </div>
 
 <script>
+// ==================== FILES ====================
+const MAIN_BG       = "main background.jpg";
+const BG_B1         = "first background.jpg";
+const BG_B2         = "second background.jpg";
+const BG_B3         = "Escuela.jpg";
+const MUSIC_FILE    = "detective-story-224266.mp3";
+const SOUND_CORRECT = "correct-356013.mp3";
+const SOUND_WRONG   = "wrong-47985.mp3";
+
+// Audio objects
+const music = new Audio(MUSIC_FILE);
+music.loop = true;
+music.volume = 0.5;
+const sfxCorrect = new Audio(SOUND_CORRECT);
+const sfxWrong   = new Audio(SOUND_WRONG);
+
+function startMusic() {
+  if (state.modeExam) return;
+  music.currentTime = 0;
+  music.play().catch(()=>{});
+}
+function stopMusic() {
+  music.pause();
+  music.currentTime = 0;
+}
+function playSound(sfx) {
+  if (state.modeExam) return;
+  sfx.currentTime = 0;
+  sfx.play().catch(()=>{});
+}
+
+function setBg(imgFile) {
+  const app = document.getElementById('app');
+  app.style.backgroundImage = `url('${imgFile}')`;
+  app.style.backgroundSize  = 'cover';
+  app.style.backgroundPosition = 'center';
+  app.style.backgroundRepeat = 'no-repeat';
+}
+
 // ==================== CONFIG ====================
 const EMOJI_POOL = ["🦁","🐯","🐻","🦊","🐼","🐸","🦄","🐲","🦋","🐬","🦅","🐺","🦖","🐙","🦩","🐧"];
 const BTN_COLORS = ["#FF6B6B","#4ECDC4","#45B7D1","#FFA07A"];
@@ -596,6 +647,10 @@ function getEmoji(nama) {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if (['screen-menu','screen-solo','screen-multi','screen-gameover','screen-tamat','screen-winner'].includes(id)) {
+    setBg(MAIN_BG);
+  }
+  if (id === 'screen-menu') stopMusic();
 }
 
 // ==================== MULTIPLAYER PLAYER COUNT ====================
@@ -629,6 +684,7 @@ function startSolo(bahagian) {
   state.bahagian = bahagian;
   state.modeExam = document.getElementById('exam-mode').checked;
   state.soalanKe = 0;
+  startMusic();
   showScreen('screen-game');
   soalanSeterusnya();
 }
@@ -652,6 +708,7 @@ function startMulti(bahagian) {
     combo: 0, level: 1, wrongStreak: 0, rekod: [], badges: [], gameOver: false
   }));
   state.currentPlayerIdx = 0;
+  startMusic();
   showTurnScreen();
 }
 
@@ -661,6 +718,9 @@ function showTurnScreen() {
   const idx = state.currentPlayerIdx;
   const bg = P_BG[idx % P_BG.length];
   const bd = P_BD[idx % P_BD.length];
+  // Set game background based on bahagian
+  const bgMap = {1: BG_B1, 2: BG_B2, 3: BG_B3};
+  setBg(bgMap[state.bahagian] || MAIN_BG);
 
   const miniScores = state.players.map((px, i) => `
     <div class="mini-score-card" style="background:${P_BG[i%P_BG.length]};border-color:${P_BD[i%P_BD.length]}">
@@ -833,6 +893,10 @@ function soalanSeterusnya() {
     return;
   }
 
+  // Set background based on bahagian
+  const bgMap = {1: BG_B1, 2: BG_B2, 3: BG_B3};
+  setBg(bgMap[state.bahagian] || MAIN_BG);
+
   renderTopBar();
   updateStatusBar();
   updateSkorDisplay();
@@ -896,8 +960,8 @@ function handleAnswer(val, btn, timeout=false) {
     }
   });
 
-  if (betul) handleBetul(elapsed);
-  else handleSalah(ans, timeout, elapsed);
+  if (betul) { handleBetul(elapsed); playSound(sfxCorrect); }
+  else { handleSalah(ans, timeout, elapsed); playSound(sfxWrong); }
 }
 
 function handleBetul(elapsed) {
@@ -975,6 +1039,7 @@ function handleSalah(ans, timeout, elapsed) {
 // ==================== END SCREENS ====================
 function showGameOver() {
   clearInterval(timerInterval);
+  stopMusic();
   const html = `
     <p style="font-size:18px;font-weight:800;color:#DC2626">${state.namaPemain}, nyawa anda habis!</p>
     <p style="font-size:24px;font-weight:800;color:#00C9A7;margin:8px 0">Skor: ${state.skor}</p>
@@ -986,6 +1051,7 @@ function showGameOver() {
 
 function tamatPermainan() {
   clearInterval(timerInterval);
+  stopMusic();
   awardBadges();
   saveLeaderboard();
 
@@ -1027,6 +1093,7 @@ function tamatGiliranPemain() {
 }
 
 function showWinner() {
+  stopMusic();
   const sorted = [...state.players].sort((a,b) => b.skor - a.skor);
   const winner = sorted[0];
   const winIdx = state.players.indexOf(winner);
@@ -1153,4 +1220,3 @@ function shuffle(arr) {
 </script>
 </body>
 </html>
-   
