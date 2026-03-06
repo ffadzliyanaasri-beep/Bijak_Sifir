@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 <head>
 <meta charset="UTF-8">
@@ -7,32 +6,128 @@
 
 <style>
 
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
 body{
-font-family:Arial;
-text-align:center;
+
+font-family:Arial, sans-serif;
+
+/* FULL BACKGROUND */
 background-image:url("main background.jpg");
 background-size:cover;
+background-position:center;
+background-repeat:no-repeat;
+
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
 color:white;
+
 }
+
+/* MAIN BOX */
+
+.container{
+
+width:550px;
+padding:35px;
+
+background:rgba(0,0,0,0.45);
+
+border-radius:20px;
+
+backdrop-filter:blur(8px);
+
+box-shadow:0 10px 40px rgba(0,0,0,0.4);
+
+text-align:center;
+
+}
+
+/* TITLE */
+
+h1{
+margin-bottom:20px;
+}
+
+/* INPUT */
+
+input{
+
+padding:12px;
+width:80%;
+font-size:16px;
+border-radius:8px;
+border:none;
+margin-bottom:20px;
+
+}
+
+/* BUTTON */
 
 button{
-padding:14px;
+
+padding:14px 20px;
 margin:10px;
-font-size:18px;
-border-radius:10px;
+font-size:16px;
+
 border:none;
+border-radius:10px;
+
 cursor:pointer;
+
+transition:0.3s;
+
 }
 
+/* MENU BUTTON */
+
+.menuBtn{
+
+background:#4ECDC4;
+color:white;
+
+}
+
+.menuBtn:hover{
+
+background:#2EA89E;
+transform:scale(1.05);
+
+}
+
+/* ANSWER BUTTON */
+
 .answer{
+
 display:block;
 width:220px;
 margin:10px auto;
-background:#4ECDC4;
+
+background:#ffcc5c;
+color:black;
+
 }
 
 .answer:hover{
-background:#2EA89E;
+
+background:#ffb347;
+transform:scale(1.05);
+
+}
+
+/* GAME INFO */
+
+.info{
+
+margin-top:20px;
+font-size:18px;
+
 }
 
 #game{
@@ -40,20 +135,25 @@ display:none;
 }
 
 </style>
-
 </head>
 
 <body>
+
+<div class="container">
 
 <h1>🎮 Permainan Bijak Sifir</h1>
 
 <div id="menu">
 
-<input id="player" placeholder="Masukkan Nama" style="padding:10px;font-size:18px">
+<input id="player" placeholder="Masukkan Nama Pemain">
 
-<br><br>
+<br>
 
-<button onclick="startGame(1)">Bahagian 1 (Sifir)</button> <button onclick="startGame(2)">Bahagian 2 (Unit)</button> <button onclick="startGame(3)">Bahagian 3 (Masalah)</button>
+<button class="menuBtn" onclick="startGame(1)">Bahagian 1 (Sifir)</button>
+
+<button class="menuBtn" onclick="startGame(2)">Bahagian 2 (Unit)</button>
+
+<button class="menuBtn" onclick="startGame(3)">Bahagian 3 (Masalah)</button>
 
 </div>
 
@@ -65,7 +165,7 @@ display:none;
 
 <div id="answers"></div>
 
-<p>
+<div class="info">
 
 Skor: <span id="score">0</span> |
 ❤️ Nyawa: <span id="life">3</span> |
@@ -73,222 +173,11 @@ Skor: <span id="score">0</span> |
 📈 Level: <span id="level">1</span> |
 ⏱ Masa: <span id="timer">20</span>
 
-</p>
+</div>
 
 </div>
 
-<audio id="music" src="detective-story-224266.mp3" loop></audio> <audio id="correct" src="correct-356013.mp3"></audio> <audio id="wrong" src="wrong-47985.mp3"></audio>
-
-<script>
-
-let score=0
-let life=3
-let combo=0
-let level=1
-let bahagian=1
-let answer=0
-let timer=20
-let interval
-
-function startGame(b){
-
-let name=document.getElementById("player").value
-
-if(name==""){
-alert("Masukkan nama dahulu")
-return
-}
-
-bahagian=b
-
-document.getElementById("menu").style.display="none"
-document.getElementById("game").style.display="block"
-
-document.getElementById("playerName").innerText="👤 "+name
-
-document.getElementById("music").play()
-
-nextQuestion()
-
-}
-
-function startTimer(){
-
-clearInterval(interval)
-
-timer=20
-
-document.getElementById("timer").innerText=timer
-
-interval=setInterval(()=>{
-
-timer--
-
-document.getElementById("timer").innerText=timer
-
-if(timer<=0){
-
-clearInterval(interval)
-
-wrong()
-
-}
-
-},1000)
-
-}
-
-function nextQuestion(){
-
-let q
-
-if(bahagian==1) q=sifir()
-if(bahagian==2) q=unit()
-if(bahagian==3) q=problem()
-
-document.getElementById("question").innerText=q.text
-
-answer=q.answer
-
-let html=""
-
-q.choices.forEach(c=>{
-html+=`<button class="answer" onclick="check(${c})">${c}</button>`
-})
-
-document.getElementById("answers").innerHTML=html
-
-startTimer()
-
-}
-
-function sifir(){
-
-let a=rand(2,9)
-let b=rand(2,9)
-
-let ans=a*b
-
-return{
-
-text:a+" × "+b+" = ?",
-
-answer:ans,
-
-choices:shuffle([
-ans,
-ans+rand(1,5),
-ans-rand(1,5),
-ans+rand(6,10)
-])
-
-}
-
-}
-
-function unit(){
-
-let v=rand(1,10)
-
-let ans=v*1000
-
-return{
-
-text:v+" kg = ? g",
-
-answer:ans,
-
-choices:shuffle([
-ans,
-ans+100,
-ans-100,
-ans+500
-])
-
-}
-
-}
-
-function problem(){
-
-return{
-
-text:"Alia ada 32cm + 57cm. Berapa mm?",
-
-answer:890,
-
-choices:shuffle([890,880,900,89])
-
-}
-
-}
-
-function check(v){
-
-clearInterval(interval)
-
-if(v==answer){
-
-document.getElementById("correct").play()
-
-score++
-combo++
-
-if(combo>=5) level++
-
-}else{
-
-wrong()
-return
-
-}
-
-update()
-
-nextQuestion()
-
-}
-
-function wrong(){
-
-document.getElementById("wrong").play()
-
-life--
-combo=0
-
-update()
-
-if(life<=0){
-
-alert("Game Over! Skor: "+score)
-location.reload()
-
-}else{
-
-nextQuestion()
-
-}
-
-}
-
-function update(){
-
-document.getElementById("score").innerText=score
-document.getElementById("life").innerText=life
-document.getElementById("combo").innerText=combo
-document.getElementById("level").innerText=level
-
-}
-
-function rand(a,b){
-return Math.floor(Math.random()*(b-a+1))+a
-}
-
-function shuffle(arr){
-return arr.sort(()=>Math.random()-0.5)
-}
-
-</script>
+</div>
 
 </body>
 </html>
