@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
 <meta charset="UTF-8">
@@ -6,132 +7,32 @@
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
-
 body{
-
-font-family:Arial, sans-serif;
-
-/* FULL BACKGROUND */
-
+font-family:Arial;
+text-align:center;
 background-image:url("main background.jpg");
 background-size:cover;
-background-position:center;
-background-repeat:no-repeat;
-
-height:100vh;
-
-display:flex;
-justify-content:center;
-align-items:center;
-
 color:white;
-
 }
-
-/* MAIN CONTAINER */
-
-.container{
-
-background:rgba(0,0,0,0.5);
-padding:35px;
-border-radius:20px;
-
-width:550px;
-
-backdrop-filter:blur(8px);
-
-text-align:center;
-
-box-shadow:0 10px 40px rgba(0,0,0,0.4);
-
-}
-
-/* TITLE */
-
-h1{
-margin-bottom:20px;
-}
-
-/* INPUT */
-
-input{
-
-padding:12px;
-font-size:16px;
-border-radius:10px;
-border:none;
-
-width:80%;
-margin-bottom:20px;
-
-}
-
-/* BUTTON */
 
 button{
-
-padding:14px 20px;
+padding:14px;
 margin:10px;
-
-font-size:16px;
-
-border:none;
+font-size:18px;
 border-radius:10px;
-
+border:none;
 cursor:pointer;
-
-transition:0.3s;
-
 }
-
-/* MENU BUTTON */
-
-.menuBtn{
-
-background:#4ECDC4;
-color:white;
-
-}
-
-.menuBtn:hover{
-
-background:#2EA89E;
-transform:scale(1.05);
-
-}
-
-/* ANSWER BUTTON */
 
 .answer{
-
 display:block;
 width:220px;
 margin:10px auto;
-
-background:#FFD166;
-color:black;
-
+background:#4ECDC4;
 }
 
 .answer:hover{
-
-background:#f5b942;
-transform:scale(1.05);
-
-}
-
-/* INFO */
-
-.info{
-
-margin-top:20px;
-font-size:18px;
-
+background:#2EA89E;
 }
 
 #game{
@@ -144,19 +45,15 @@ display:none;
 
 <body>
 
-<div class="container">
-
 <h1>🎮 Permainan Bijak Sifir</h1>
 
 <div id="menu">
 
-<input id="player" placeholder="Masukkan Nama Pemain">
+<input id="player" placeholder="Masukkan Nama" style="padding:10px;font-size:18px">
 
-<br>
+<br><br>
 
-<button class="menuBtn" onclick="startGame(1)">Bahagian 1 (Sifir)</button>
-<button class="menuBtn" onclick="startGame(2)">Bahagian 2 (Unit)</button>
-<button class="menuBtn" onclick="startGame(3)">Bahagian 3 (Masalah)</button>
+<button onclick="startGame(1)">Bahagian 1 (Sifir)</button> <button onclick="startGame(2)">Bahagian 2 (Unit)</button> <button onclick="startGame(3)">Bahagian 3 (Masalah)</button>
 
 </div>
 
@@ -168,7 +65,7 @@ display:none;
 
 <div id="answers"></div>
 
-<div class="info">
+<p>
 
 Skor: <span id="score">0</span> |
 ❤️ Nyawa: <span id="life">3</span> |
@@ -176,15 +73,11 @@ Skor: <span id="score">0</span> |
 📈 Level: <span id="level">1</span> |
 ⏱ Masa: <span id="timer">20</span>
 
-</div>
+</p>
 
 </div>
 
-</div>
-
-<audio id="music" src="detective-story-224266.mp3" loop></audio>
-<audio id="correct" src="correct-356013.mp3"></audio>
-<audio id="wrong" src="wrong-47985.mp3"></audio>
+<audio id="music" src="detective-story-224266.mp3" loop></audio> <audio id="correct" src="correct-356013.mp3"></audio> <audio id="wrong" src="wrong-47985.mp3"></audio>
 
 <script>
 
@@ -399,7 +292,3 @@ return arr.sort(()=>Math.random()-0.5)
 
 </body>
 </html>
-
-
-
-
