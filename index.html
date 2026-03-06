@@ -1,203 +1,1222 @@
 <!DOCTYPE html>
-
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bijak Sifir 2025</title>
-
+<title>Bijak Sifir 2025 ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --pink:    #FF6B9D;
+    --teal:    #00C9A7;
+    --purple:  #A78BFA;
+    --orange:  #F97316;
+    --blue:    #1E3A5F;
+    --lblue:   #0EA5E9;
+    --red:     #EF4444;
+    --green:   #16A34A;
+    --amber:   #F59E0B;
+    --dpurple: #7C3AED;
+    --grey:    #64748B;
+    --btn1: #FF6B6B; --btn2: #4ECDC4; --btn3: #45B7D1; --btn4: #FFA07A;
+    --p1bg: #FFE4E1; --p2bg: #E1F5FE; --p3bg: #E8F5E9; --p4bg: #FFF9C4;
+    --p1bd: #FF6B6B; --p2bd: #4ECDC4; --p3bd: #66BB6A; --p4bd: #FFC107;
+  }
 
-body{
-font-family:Arial, sans-serif;
-background:linear-gradient(135deg,#667eea,#764ba2);
-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-margin:0;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-#game{
-background:white;
-padding:30px;
-border-radius:20px;
-width:420px;
-text-align:center;
-box-shadow:0 10px 30px rgba(0,0,0,0.3);
-}
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+  }
 
-h1{
-margin-top:0;
-}
+  #app {
+    background: white;
+    border-radius: 24px;
+    width: 500px;
+    min-height: 560px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+    position: relative;
+  }
 
-button{
-padding:12px 20px;
-margin:6px;
-border:none;
-border-radius:10px;
-font-size:16px;
-cursor:pointer;
-}
+  /* Background overlay so text stays readable */
+  #app::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.82);
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 24px;
+  }
+  .screen, #app > * { position: relative; z-index: 1; }
 
-.answer{
-width:45%;
-background:#4ECDC4;
-color:white;
-font-weight:bold;
-}
+  /* SCREENS */
+  .screen { display: none; padding: 20px; animation: fadeIn .3s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
-.answer:hover{
-background:#26a69a;
-}
+  /* HEADER */
+  .game-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    text-align: center;
+    padding: 16px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 26px;
+    letter-spacing: 1px;
+  }
+  .game-header small { font-family: 'Nunito', sans-serif; font-size: 11px; opacity: .8; display: block; }
 
-#question{
-font-size:22px;
-margin:20px 0;
-font-weight:bold;
-}
+  /* BUTTONS */
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    transition: all .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+  .btn:active { transform: translateY(0); }
+  .btn-purple { background: #7C3AED; color: white; }
+  .btn-teal   { background: #00C9A7; color: white; }
+  .btn-pink   { background: #FF6B9D; color: white; }
+  .btn-blue   { background: #0EA5E9; color: white; }
+  .btn-grey   { background: #E2E8F0; color: #334155; }
+  .btn-green  { background: #16A34A; color: white; }
+  .btn-full   { width: 100%; justify-content: center; margin: 4px 0; }
+  .btn-sm     { padding: 6px 12px; font-size: 12px; }
 
-#score{
-margin-top:10px;
-font-size:18px;
-}
+  /* FORM */
+  input[type="text"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #E2E8F0;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border .2s;
+    margin: 4px 0 10px;
+  }
+  input[type="text"]:focus { border-color: #7C3AED; }
+  label { font-size: 13px; font-weight: 700; color: #374151; }
 
+  /* SECTION BUTTONS */
+  .section-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
+  .section-btn {
+    padding: 12px 8px;
+    border: 3px solid transparent;
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    text-align: center;
+    transition: all .2s;
+    line-height: 1.4;
+  }
+  .section-btn:hover { transform: scale(1.04); box-shadow: 0 4px 14px rgba(0,0,0,.15); }
+  .section-btn.b1 { background: #FFE4E1; border-color: #FF6B6B; color: #C0392B; }
+  .section-btn.b2 { background: #E1F5FE; border-color: #4ECDC4; color: #006064; }
+  .section-btn.b3 { background: #FFF9C4; border-color: #F59E0B; color: #92400E; }
+
+  /* STATUS BAR */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    background: #F8F0FF;
+    border-radius: 10px;
+    padding: 6px 10px;
+    margin: 6px 0;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .status-bar .nyawa { color: var(--red); }
+  .status-bar .combo { color: var(--amber); }
+  .status-bar .level-badge {
+    margin-left: auto;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  /* QUESTION */
+  .q-section { color: var(--purple); font-weight: 800; font-size: 13px; margin: 4px 0 2px; }
+  .q-num { color: var(--orange); font-size: 12px; font-weight: 700; }
+  .q-text {
+    background: #F0F4FF;
+    border-left: 4px solid var(--dpurple);
+    border-radius: 0 12px 12px 0;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--blue);
+    margin: 8px 0;
+    min-height: 60px;
+    line-height: 1.5;
+  }
+
+  /* ANSWER BUTTONS */
+  .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .ans-btn {
+    padding: 14px 10px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    transition: all .15s;
+    box-shadow: 0 4px 10px rgba(0,0,0,.15);
+  }
+  .ans-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,.2); }
+  .ans-btn:active { transform: translateY(0); }
+  .ans-btn.correct { background: #16A34A !important; animation: pulse .4s ease; }
+  .ans-btn.wrong   { background: #DC2626 !important; }
+  .ans-btn:disabled { cursor: default; transform: none; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+
+  /* FOOTER GAME */
+  .game-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0 0;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .timer { color: var(--lblue); }
+  .timer.warn { color: var(--red); animation: blink .5s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.5} }
+  .status-msg { flex: 1; font-size: 12px; }
+  .status-msg.ok   { color: var(--green); }
+  .status-msg.fail { color: var(--red); }
+  .skor-display { color: var(--teal); margin-left: auto; }
+
+  /* TOP BAR multiplayer */
+  .top-bar {
+    display: flex;
+    gap: 4px;
+    padding: 6px 0;
+    overflow-x: auto;
+    align-items: center;
+  }
+  .player-chip {
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    border: 2px solid transparent;
+  }
+  .player-chip.active { border-width: 3px; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+  .top-bar-btns { margin-left: auto; display: flex; gap: 4px; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { background: #E5E7EB; border-radius: 99px; height: 8px; margin: 6px 0; overflow: hidden; }
+  .progress-bar  { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #7C3AED, #EC4899); transition: width .4s ease; }
+
+  /* TURN SCREEN */
+  .turn-screen {
+    text-align: center;
+    padding: 30px 20px;
+  }
+  .turn-emoji { font-size: 80px; margin-bottom: 10px; animation: bounce 1s infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  .turn-name { font-family: 'Fredoka One', cursive; font-size: 28px; color: var(--blue); }
+  .turn-info { color: var(--grey); font-size: 14px; margin: 8px 0 16px; }
+  .mini-scores { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 12px 0; }
+  .mini-score-card {
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 2px solid transparent;
+  }
+
+  /* WINNER SCREEN */
+  .winner-card {
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    margin: 10px 0;
+  }
+  .winner-emoji-big { font-size: 60px; }
+  .winner-name { font-family: 'Fredoka One', cursive; font-size: 26px; }
+  .rank-list { border-radius: 12px; overflow: hidden; margin: 10px 0; }
+  .rank-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .rank-row .rank-name { flex: 1; }
+  .rank-row .rank-pts  { color: var(--teal); }
+
+  /* BADGE SECTION */
+  .badge-box {
+    background: #F3E8FF;
+    border-radius: 12px;
+    padding: 12px;
+    margin: 10px 0;
+  }
+  .badge-title { color: var(--dpurple); font-weight: 800; font-size: 14px; margin-bottom: 8px; }
+  .badge-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #5B21B6;
+    padding: 3px 0;
+    font-weight: 600;
+  }
+
+  /* LEADERBOARD */
+  .lb-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin: 4px 0;
+    background: #F8F8F8;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 10px;
+  }
+  .lb-row .lb-name { flex: 1; }
+  .lb-row .lb-pts  { color: var(--teal); }
+
+  /* INFO BOX */
+  .info-box {
+    background: #FFF9E6;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--orange);
+    font-weight: 700;
+    text-align: center;
+    margin: 8px 0;
+  }
+
+  /* TABS */
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+
+  /* PLAYER ENTRY */
+  .player-entry-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  .player-entry-row .emoji-label { font-size: 20px; min-width: 28px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: #1E3A5F;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 99px;
+    font-weight: 700;
+    font-size: 14px;
+    z-index: 999;
+    transition: transform .3s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* MODAL OVERLAY */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-box {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 420px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    animation: fadeIn .2s ease;
+  }
+  .modal-title { font-family: 'Fredoka One', cursive; font-size: 22px; color: var(--blue); margin-bottom: 12px; }
+
+  /* Divider */
+  hr { border: none; border-top: 1px solid #E5E7EB; margin: 12px 0; }
+
+  /* Scrollable */
+  .scroll-box { max-height: 200px; overflow-y: auto; }
+
+  /* Checkbox */
+  .check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--grey); margin: 6px 0; }
+  input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--dpurple); }
+
+  /* Spinbox */
+  .spin-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+  .spin-row button { width: 34px; height: 34px; border: 2px solid #E2E8F0; border-radius: 8px; background: white; font-size: 18px; cursor: pointer; font-weight: bold; }
+  .spin-row button:hover { background: #F0F4FF; }
+  .spin-val { font-size: 20px; font-weight: 800; color: var(--dpurple); min-width: 30px; text-align: center; }
+
+  .text-center { text-align: center; }
+  .mt4 { margin-top: 4px; }
+  .mt8 { margin-top: 8px; }
+  .flex-row { display: flex; gap: 8px; }
+  .flex-row .btn { flex: 1; justify-content: center; }
 </style>
-
 </head>
-
 <body>
 
-<div id="game">
+<div id="app">
+  <!-- MAIN MENU -->
+  <div id="screen-menu" class="screen active">
+    <div class="game-header">
+      🎮 Bijak Sifir 2025
+      <small>Matematik Seronok & Mencabar!</small>
+    </div>
+    <div style="padding:16px">
+      <div class="tabs">
+        <button class="btn btn-blue btn-full" onclick="showScreen('screen-solo')">👤 Solo</button>
+        <button class="btn btn-green btn-full" onclick="showScreen('screen-multi')">👥 Multiplayer</button>
+      </div>
+      <div class="info-box">❤️ 3 Nyawa &nbsp;|&nbsp; 🔥 Combo Bonus &nbsp;|&nbsp; 📈 Level Auto &nbsp;|&nbsp; 🏆 Badge</div>
+      <hr>
+      <button class="btn btn-purple btn-full" onclick="showLeaderboard()">🏆 Leaderboard</button>
+      <button class="btn btn-grey btn-full mt4" onclick="showBadgeList()">📖 Senarai Badge</button>
+    </div>
+  </div>
 
-<h1>🎮 Bijak Sifir</h1>
+  <!-- SOLO SETUP -->
+  <div id="screen-solo" class="screen">
+    <div class="game-header">👤 Mod Solo</div>
+    <div style="padding:16px">
+      <label>Nama Pemain:</label>
+      <input type="text" id="solo-name" placeholder="Masukkan nama anda...">
+      <div class="check-row">
+        <input type="checkbox" id="exam-mode">
+        <label for="exam-mode">Mode Peperiksaan (tiada bunyi & highlight)</label>
+      </div>
+      <hr>
+      <div style="font-weight:800;color:var(--purple);margin-bottom:8px">Pilih Bahagian:</div>
+      <div class="section-btns">
+        <button class="section-btn b1" onclick="startSolo(1)">📐 Bahagian 1<br><small>Sifir</small></button>
+        <button class="section-btn b2" onclick="startSolo(2)">📏 Bahagian 2<br><small>Tukar Unit</small></button>
+        <button class="section-btn b3" onclick="startSolo(3)">🧮 Bahagian 3<br><small>Masalah</small></button>
+      </div>
+      <button class="btn btn-grey btn-full mt8" onclick="showScreen('screen-menu')">← Balik</button>
+    </div>
+  </div>
 
-<div id="menu">
+  <!-- MULTIPLAYER SETUP -->
+  <div id="screen-multi" class="screen">
+    <div class="game-header">👥 Mod Multiplayer</div>
+    <div style="padding:16px">
+      <label>Bilangan Pemain:</label>
+      <div class="spin-row">
+        <button onclick="changePlayers(-1)">−</button>
+        <span class="spin-val" id="player-count-display">2</span>
+        <button onclick="changePlayers(1)">+</button>
+        <span style="font-size:13px;color:var(--grey)">pemain (2–4)</span>
+      </div>
+      <div id="player-entries"></div>
+      <div class="check-row">
+        <input type="checkbox" id="exam-mode-mp">
+        <label for="exam-mode-mp">Mode Peperiksaan</label>
+      </div>
+      <hr>
+      <div style="font-weight:800;color:var(--purple);margin-bottom:8px">Pilih Bahagian:</div>
+      <div class="section-btns">
+        <button class="section-btn b1" onclick="startMulti(1)">📐 Bahagian 1<br><small>Sifir</small></button>
+        <button class="section-btn b2" onclick="startMulti(2)">📏 Bahagian 2<br><small>Tukar Unit</small></button>
+        <button class="section-btn b3" onclick="startMulti(3)">🧮 Bahagian 3<br><small>Masalah</small></button>
+      </div>
+      <button class="btn btn-grey btn-full mt8" onclick="showScreen('screen-menu')">← Balik</button>
+    </div>
+  </div>
 
-<input id="player" placeholder="Masukkan Nama" style="padding:10px;width:80%"><br><br>
+  <!-- TURN INTRO (Multiplayer) -->
+  <div id="screen-turn" class="screen">
+    <div id="turn-content" class="turn-screen"></div>
+  </div>
 
-<button onclick="startGame()">Mula Game</button>
+  <!-- GAME SCREEN -->
+  <div id="screen-game" class="screen">
+    <div id="game-topbar"></div>
+    <div style="padding:0 14px 14px">
+      <div id="progress-wrap" class="progress-wrap"><div id="progress-bar" class="progress-bar" style="width:0%"></div></div>
+      <div class="status-bar">
+        <span class="nyawa" id="g-nyawa">❤️❤️❤️</span>
+        <span class="combo" id="g-combo">🔥 Combo: —</span>
+        <span class="level-badge" id="g-level">📈 Level 1</span>
+      </div>
+      <div class="q-section" id="g-section">Bahagian 1: Sifir</div>
+      <div class="q-num" id="g-qnum">Soalan 1/10</div>
+      <div class="q-text" id="g-question">—</div>
+      <div class="answer-grid" id="answer-grid"></div>
+      <div class="game-footer">
+        <span class="timer" id="g-timer">⏱ 0.0s</span>
+        <span class="status-msg" id="g-status"></span>
+        <span class="skor-display" id="g-skor">Skor: 0</span>
+      </div>
+    </div>
+  </div>
 
+  <!-- GAME OVER -->
+  <div id="screen-gameover" class="screen">
+    <div class="game-header" style="background:linear-gradient(135deg,#DC2626,#F97316)">
+      💔 Game Over!
+    </div>
+    <div style="padding:16px">
+      <div id="go-content"></div>
+      <button class="btn btn-pink btn-full mt8" onclick="showScreen('screen-menu')">🔄 Cuba Lagi</button>
+      <button class="btn btn-grey btn-full mt4" onclick="showLeaderboard()">🏆 Leaderboard</button>
+    </div>
+  </div>
+
+  <!-- TAMAT SOLO -->
+  <div id="screen-tamat" class="screen">
+    <div class="game-header" style="background:linear-gradient(135deg,#16A34A,#0EA5E9)">
+      🎉 Tamat!
+    </div>
+    <div style="padding:16px">
+      <div id="tamat-content"></div>
+      <button class="btn btn-teal btn-full mt8" onclick="showScreen('screen-menu')">🏠 Menu Utama</button>
+      <button class="btn btn-grey btn-full mt4" onclick="showLeaderboard()">🏆 Leaderboard</button>
+    </div>
+  </div>
+
+  <!-- WINNER (Multiplayer) -->
+  <div id="screen-winner" class="screen">
+    <div class="game-header" style="background:linear-gradient(135deg,#F59E0B,#EF4444)">
+      🏆 Keputusan Akhir!
+    </div>
+    <div style="padding:16px">
+      <div id="winner-content"></div>
+      <div class="flex-row mt8">
+        <button class="btn btn-green" onclick="showScreen('screen-menu')">🔄 Main Lagi</button>
+        <button class="btn btn-purple" onclick="showLeaderboard()">🏆 Leaderboard</button>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div id="play" style="display:none">
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
-<div id="question"></div>
-
-<div>
-<button class="answer" onclick="answer(this)"></button>
-<button class="answer" onclick="answer(this)"></button>
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-lb">
+  <div class="modal-box">
+    <div class="modal-title">🏆 Top 10 Leaderboard</div>
+    <div id="lb-content"></div>
+    <button class="btn btn-grey btn-full mt8" onclick="closeModal('modal-lb')">Tutup</button>
+  </div>
 </div>
 
-<div>
-<button class="answer" onclick="answer(this)"></button>
-<button class="answer" onclick="answer(this)"></button>
-</div>
-
-<div id="score">Skor: 0</div>
-
-</div>
-
-<div id="gameover" style="display:none">
-
-<h2>Game Tamat</h2>
-
-<p id="final"></p>
-
-<button onclick="location.reload()">Main Lagi</button>
-
-</div>
-
+<div class="modal-overlay" id="modal-badges">
+  <div class="modal-box">
+    <div class="modal-title">📖 Senarai Badge</div>
+    <div id="badge-list-content"></div>
+    <button class="btn btn-grey btn-full mt8" onclick="closeModal('modal-badges')">Tutup</button>
+  </div>
 </div>
 
 <script>
+// ==================== FILES ====================
+const MAIN_BG       = "main background.jpg";
+const BG_B1         = "first background.jpg";
+const BG_B2         = "second background.jpg";
+const BG_B3         = "Escuela.jpg";
+const MUSIC_FILE    = "detective-story-224266.mp3";
+const SOUND_CORRECT = "correct-356013.mp3";
+const SOUND_WRONG   = "wrong-47985.mp3";
 
-let score=0
-let correct=0
-let q=0
+// Audio objects
+const music = new Audio(MUSIC_FILE);
+music.loop = true;
+music.volume = 0.5;
+const sfxCorrect = new Audio(SOUND_CORRECT);
+const sfxWrong   = new Audio(SOUND_WRONG);
 
-function startGame(){
-
-document.getElementById("menu").style.display="none"
-document.getElementById("play").style.display="block"
-
-nextQuestion()
-
+function startMusic() {
+  if (state.modeExam) return;
+  music.currentTime = 0;
+  music.play().catch(()=>{});
+}
+function stopMusic() {
+  music.pause();
+  music.currentTime = 0;
+}
+function playSound(sfx) {
+  if (state.modeExam) return;
+  sfx.currentTime = 0;
+  sfx.play().catch(()=>{});
 }
 
-function nextQuestion(){
-
-q++
-
-if(q>10){
-endGame()
-return
+function setBg(imgFile) {
+  const app = document.getElementById('app');
+  app.style.backgroundImage = `url('${imgFile}')`;
+  app.style.backgroundSize  = 'cover';
+  app.style.backgroundPosition = 'center';
+  app.style.backgroundRepeat = 'no-repeat';
 }
 
-let a=Math.floor(Math.random()*12)+1
-let b=Math.floor(Math.random()*12)+1
+// ==================== CONFIG ====================
+const EMOJI_POOL = ["🦁","🐯","🐻","🦊","🐼","🐸","🦄","🐲","🦋","🐬","🦅","🐺","🦖","🐙","🦩","🐧"];
+const BTN_COLORS = ["#FF6B6B","#4ECDC4","#45B7D1","#FFA07A"];
+const P_BG = ["#FFE4E1","#E1F5FE","#E8F5E9","#FFF9C4"];
+const P_BD = ["#FF6B6B","#4ECDC4","#66BB6A","#FFC107"];
+const SOALAN_PER_BAHAGIAN = 10;
+const LEVEL_CONFIG = {
+  1:{nama:"Mudah",   masa:30, bonus:1, color:"#90EE90"},
+  2:{nama:"Sederhana",masa:20,bonus:2, color:"#FFD700"},
+  3:{nama:"Susah",   masa:12, bonus:3, color:"#FF6B6B"},
+};
+const BADGE_LIST = {
+  "Sifir Master":  {desc:"Dapat skor penuh di Bahagian 1",icon:"🌟"},
+  "Unit Champion": {desc:"Dapat skor penuh di Bahagian 2",icon:"📏"},
+  "Problem Solver":{desc:"Dapat skor penuh di Bahagian 3",icon:"🧠"},
+  "Perfect Score": {desc:"Jawab semua soalan betul!",     icon:"💯"},
+  "Speed Genius":  {desc:"Purata masa < 5 saat",          icon:"⚡"},
+  "Combo King":    {desc:"5 jawapan betul berturut-turut",icon:"🔥"},
+  "Survivor":      {desc:"Habis tanpa hilang nyawa",      icon:"❤️"},
+  "Level Master":  {desc:"Capai Level 3",                 icon:"🚀"},
+  "Quick Thinker": {desc:"Jawab soalan dalam masa < 3s",  icon:"💨"},
+};
 
-correct=a*b
+// ==================== STATE ====================
+let state = {};
+let timerInterval = null;
 
-document.getElementById("question").innerHTML=
-"Soalan "+q+": "+a+" × "+b+" = ?"
+function resetState() {
+  state = {
+    mode: 'solo',       // 'solo' | 'multi'
+    bahagian: 1,
+    modeExam: false,
+    // Solo
+    namaPemain: '',
+    skor: 0,
+    nyawa: 3,
+    combo: 0,
+    level: 1,
+    wrongStreak: 0,
+    rekod: [],
+    badges: [],
+    soalanKe: 0,
+    // Multi
+    players: [],
+    currentPlayerIdx: 0,
+    playerCount: 2,
+    // Game
+    currentAnswer: null,
+    masaMula: 0,
+  };
+}
+resetState();
 
-let answers=[correct]
-
-while(answers.length<4){
-
-let n=correct+Math.floor(Math.random()*10)-5
-
-if(n>0 && !answers.includes(n)){
-answers.push(n)
+// ==================== EMOJI ====================
+function getEmoji(nama) {
+  let sum = 0;
+  for (let c of nama) sum += c.charCodeAt(0);
+  return EMOJI_POOL[sum % EMOJI_POOL.length];
 }
 
+// ==================== SCREEN NAV ====================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (['screen-menu','screen-solo','screen-multi','screen-gameover','screen-tamat','screen-winner'].includes(id)) {
+    setBg(MAIN_BG);
+  }
+  if (id === 'screen-menu') stopMusic();
 }
 
-answers.sort(()=>Math.random()-0.5)
+// ==================== MULTIPLAYER PLAYER COUNT ====================
+let playerCount = 2;
+function changePlayers(d) {
+  playerCount = Math.max(2, Math.min(4, playerCount + d));
+  document.getElementById('player-count-display').textContent = playerCount;
+  renderPlayerEntries();
+}
+function renderPlayerEntries() {
+  const div = document.getElementById('player-entries');
+  div.innerHTML = '<label style="margin-top:8px;display:block">Nama Pemain:</label>';
+  for (let i = 0; i < playerCount; i++) {
+    const emoji = EMOJI_POOL[i];
+    div.innerHTML += `
+      <div class="player-entry-row">
+        <span class="emoji-label">${emoji}</span>
+        <input type="text" id="mp-name-${i}" placeholder="Pemain ${i+1}..." style="margin:0">
+      </div>`;
+  }
+}
+renderPlayerEntries();
 
-let btns=document.querySelectorAll(".answer")
-
-for(let i=0;i<4;i++){
-btns[i].innerHTML=answers[i]
+// ==================== SOLO START ====================
+function startSolo(bahagian) {
+  const nama = document.getElementById('solo-name').value.trim();
+  if (!nama) { showToast('⚠️ Sila masukkan nama!'); return; }
+  resetState();
+  state.mode = 'solo';
+  state.namaPemain = nama;
+  state.bahagian = bahagian;
+  state.modeExam = document.getElementById('exam-mode').checked;
+  state.soalanKe = 0;
+  startMusic();
+  showScreen('screen-game');
+  soalanSeterusnya();
 }
 
+// ==================== MULTI START ====================
+function startMulti(bahagian) {
+  const names = [];
+  for (let i = 0; i < playerCount; i++) {
+    const n = document.getElementById(`mp-name-${i}`)?.value.trim();
+    if (!n) { showToast('⚠️ Sila isi semua nama!'); return; }
+    names.push(n);
+  }
+  if (new Set(names).size !== names.length) { showToast('⚠️ Nama mesti berbeza!'); return; }
+
+  resetState();
+  state.mode = 'multi';
+  state.bahagian = bahagian;
+  state.modeExam = document.getElementById('exam-mode-mp').checked;
+  state.players = names.map(n => ({
+    nama: n, emoji: getEmoji(n), skor: 0, nyawa: 3,
+    combo: 0, level: 1, wrongStreak: 0, rekod: [], badges: [], gameOver: false
+  }));
+  state.currentPlayerIdx = 0;
+  startMusic();
+  showTurnScreen();
 }
 
-function answer(btn){
+// ==================== TURN SCREEN ====================
+function showTurnScreen() {
+  const p = state.players[state.currentPlayerIdx];
+  const idx = state.currentPlayerIdx;
+  const bg = P_BG[idx % P_BG.length];
+  const bd = P_BD[idx % P_BD.length];
+  // Set game background based on bahagian
+  const bgMap = {1: BG_B1, 2: BG_B2, 3: BG_B3};
+  setBg(bgMap[state.bahagian] || MAIN_BG);
 
-let val=parseInt(btn.innerHTML)
+  const miniScores = state.players.map((px, i) => `
+    <div class="mini-score-card" style="background:${P_BG[i%P_BG.length]};border-color:${P_BD[i%P_BD.length]}">
+      ${px.emoji} ${px.nama.substring(0,6)}: <b>${px.skor}</b>
+      ${px.gameOver ? '💀' : '❤'.repeat(px.nyawa)}
+    </div>`).join('');
 
-if(val===correct){
-
-score+=10
-alert("Betul!")
-
-}else{
-
-alert("Salah! Jawapan: "+correct)
-
+  document.getElementById('turn-content').innerHTML = `
+    <div style="background:${bg};border-radius:16px;padding:24px;border:3px solid ${bd}">
+      <div class="turn-emoji">${p.emoji}</div>
+      <div class="turn-name">${p.nama}</div>
+      <div class="turn-info">Skor: <b>${p.skor}</b> &nbsp;|&nbsp; ${'❤️'.repeat(p.nyawa)}${'🖤'.repeat(3-p.nyawa)}</div>
+      <div class="mini-scores">${miniScores}</div>
+      <button class="btn btn-purple" style="background:${bd}" onclick="mulaGiliran()">
+        ▶ Mula Giliran ${p.emoji} ${p.nama}
+      </button>
+    </div>`;
+  showScreen('screen-turn');
 }
 
-document.getElementById("score").innerHTML="Skor: "+score
-
-nextQuestion()
-
+function mulaGiliran() {
+  state.soalanKe = 0;
+  showScreen('screen-game');
+  soalanSeterusnya();
 }
 
-function endGame(){
-
-document.getElementById("play").style.display="none"
-document.getElementById("gameover").style.display="block"
-
-let name=document.getElementById("player").value
-
-document.getElementById("final").innerHTML=
-name+" mendapat skor "+score
-
+// ==================== GAME UI ====================
+function renderTopBar() {
+  const topbar = document.getElementById('game-topbar');
+  if (state.mode === 'solo') {
+    topbar.innerHTML = `
+      <div style="display:flex;align-items:center;padding:8px 14px;background:#F8F0FF;gap:8px">
+        <span style="font-weight:700;font-size:13px">👤 ${state.namaPemain}</span>
+        <div style="margin-left:auto;display:flex;gap:4px">
+          <button class="btn btn-grey btn-sm" onclick="showLeaderboard()">🏆</button>
+          <button class="btn btn-grey btn-sm" onclick="showScreen('screen-menu')">Menu</button>
+        </div>
+      </div>`;
+  } else {
+    const chips = state.players.map((p, i) => {
+      const isActive = i === state.currentPlayerIdx;
+      const bg = isActive ? P_BD[i % P_BD.length] : '#DDD';
+      const nyawaTxt = p.gameOver ? '💀' : '❤'.repeat(p.nyawa);
+      return `<div class="player-chip ${isActive?'active':''}" style="background:${bg};color:${isActive?'white':'#555'}">
+        ${p.emoji} ${p.nama.substring(0,5)}<br>${p.skor}pts ${nyawaTxt}
+      </div>`;
+    }).join('');
+    topbar.innerHTML = `
+      <div class="top-bar" style="padding:6px 10px;background:#F0F4FF">
+        ${chips}
+        <div class="top-bar-btns">
+          <button class="btn btn-grey btn-sm" onclick="showScreen('screen-menu')">✕</button>
+        </div>
+      </div>`;
+  }
 }
 
+function updateStatusBar() {
+  let nyawa, combo, level;
+  if (state.mode === 'solo') {
+    nyawa = state.nyawa; combo = state.combo; level = state.level;
+  } else {
+    const p = state.players[state.currentPlayerIdx];
+    nyawa = p.nyawa; combo = p.combo; level = p.level;
+  }
+  document.getElementById('g-nyawa').textContent = '❤️'.repeat(nyawa) + '🖤'.repeat(3-nyawa);
+  document.getElementById('g-combo').textContent = combo === 0 ? '🔥 Combo: —' : combo < 3 ? `🔥 Combo: x${combo}` : `🔥🔥 Combo: x${combo}!`;
+  const lv = LEVEL_CONFIG[level];
+  const lvEl = document.getElementById('g-level');
+  lvEl.textContent = `📈 Level ${level}: ${lv.nama}`;
+  lvEl.style.background = lv.color;
+  lvEl.style.padding = '3px 10px';
+  lvEl.style.borderRadius = '8px';
+  lvEl.style.fontSize = '12px';
+  lvEl.style.fontWeight = '800';
+}
+
+function updateSkorDisplay() {
+  const skor = state.mode === 'solo' ? state.skor : state.players[state.currentPlayerIdx].skor;
+  document.getElementById('g-skor').textContent = `Skor: ${skor}`;
+}
+
+// ==================== QUESTIONS ====================
+function getLevel() {
+  return state.mode === 'solo' ? state.level : state.players[state.currentPlayerIdx].level;
+}
+
+function genSifir() {
+  const lv = getLevel();
+  let a, b;
+  if (lv===1) { a=rnd(2,5); b=rnd(2,5); }
+  else if (lv===2) { a=rnd(2,9); b=rnd(2,9); }
+  else { a=rnd(6,12); b=rnd(6,12); }
+  const ans = a*b;
+  const choices = shuffle([ans, ans+rnd(1,5), Math.max(1,ans-rnd(1,5)), ans+rnd(6,12)]);
+  return {text:`${a} × ${b} = ?`, answer:ans, choices};
+}
+
+function genUnit() {
+  const lv = getLevel();
+  const pools = {
+    1:["kg_g","l_ml","jam_min"],
+    2:["kg_g","g_kg","l_ml","ml_l","jam_min","min_jam"],
+    3:["kg_g","g_kg","l_ml","ml_l","jam_min","min_jam","hari_jam","minggu_hari"]
+  };
+  const jenis = pools[lv][Math.floor(Math.random()*pools[lv].length)];
+  let text, ans;
+  if (jenis==="kg_g")      { const v=rnd(1,20);  text=`${v} kg = ? g`;       ans=v*1000; }
+  else if (jenis==="g_kg") { const v=[1000,2000,3000,4000,5000,6000,8000,10000][rnd(0,7)]; text=`${v} g = ? kg`; ans=v/1000; }
+  else if (jenis==="l_ml") { const v=rnd(1,20);  text=`${v} L = ? mL`;       ans=v*1000; }
+  else if (jenis==="ml_l") { const v=[1000,2000,3000,4000,5000,6000][rnd(0,5)]; text=`${v} mL = ? L`; ans=v/1000; }
+  else if (jenis==="jam_min") { const v=rnd(1,10); text=`${v} jam = ? minit`; ans=v*60; }
+  else if (jenis==="min_jam") { const v=[60,120,180,240,300][rnd(0,4)]; text=`${v} minit = ? jam`; ans=v/60; }
+  else if (jenis==="hari_jam") { const v=rnd(1,7); text=`${v} hari = ? jam`; ans=v*24; }
+  else { const v=rnd(1,4); text=`${v} minggu = ? hari`; ans=v*7; }
+  const choices = genUnitChoices(ans);
+  return {text, answer:ans, choices};
+}
+
+function genUnitChoices(ans) {
+  const set = new Set([ans]);
+  while (set.size < 4) {
+    const d = ans<10?rnd(1,2):(ans<100?rnd(5,15):rnd(10,100));
+    const p = ans + (Math.random()<.5?d:-d);
+    if (p > 0) set.add(p);
+  }
+  return shuffle([...set]);
+}
+
+const MASALAH_POOL = {
+  1:[
+    {text:"Alia ada 2 gulung riben: 32 cm dan 57 cm. Jumlah panjang dalam mm?",ans:890,wrong:[880,900,89]},
+    {text:"Kek dipotong 8 bahagian. Aina makan 3/8, adik 2/8. Berapa bahagian tinggal?",ans:3,wrong:[5,2,4]},
+  ],
+  2:[
+    {text:"Mat ada kertas 76 meter. Adik potong 34 meter. Panjang tinggal dalam sentimeter?",ans:4200,wrong:[42,420,4000]},
+    {text:"Berat sebiji durian 0.5 kg. Hanafi beli 6 biji. Jumlah berat dalam gram?",ans:3000,wrong:[3,300,30000]},
+    {text:"Rauf bermain bola 30 minit sehari. Jumlah masa seminggu dalam jam?",ans:3.5,wrong:[3,4,210]},
+  ],
+  3:[
+    {text:"Sofia dapat cuti sakit 3 hari, kemudian 4 hari lagi. Jumlah dalam minggu?",ans:1,wrong:[7,2,3]},
+    {text:"Haziq bawa 2 liter air. Baki 500 ml. Berapa liter diminum?",ans:1.5,wrong:[1,2,0.5]},
+    {text:"Bekalan air 6000 L. Guna 250 L sehari. Tahan berapa hari?",ans:24,wrong:[20,25,30]},
+    {text:"Buku RM5.90 sebiji. Haidhar beli 5 buah. Baki dari RM50?",ans:20.5,wrong:[20,21,19.5]},
+  ]
+};
+
+function genMasalah() {
+  const lv = getLevel();
+  const pool = MASALAH_POOL[lv];
+  const s = pool[Math.floor(Math.random()*pool.length)];
+  const choices = shuffle([s.ans, ...s.wrong]);
+  return {text:s.text, answer:s.ans, choices};
+}
+
+function generateQuestion() {
+  if (state.bahagian===1) return genSifir();
+  if (state.bahagian===2) return genUnit();
+  return genMasalah();
+}
+
+// ==================== GAME FLOW ====================
+function soalanSeterusnya() {
+  state.soalanKe++;
+  const max = SOALAN_PER_BAHAGIAN;
+
+  if (state.soalanKe > max) {
+    if (state.mode === 'multi') tamatGiliranPemain();
+    else tamatPermainan();
+    return;
+  }
+
+  // Set background based on bahagian
+  const bgMap = {1: BG_B1, 2: BG_B2, 3: BG_B3};
+  setBg(bgMap[state.bahagian] || MAIN_BG);
+
+  renderTopBar();
+  updateStatusBar();
+  updateSkorDisplay();
+
+  const q = generateQuestion();
+  state.currentAnswer = q.answer;
+  state.masaMula = Date.now();
+
+  const bNames = {1:"Sifir",2:"Tukar Unit",3:"Masalah Matematik"};
+  document.getElementById('g-section').textContent = `Bahagian ${state.bahagian}: ${bNames[state.bahagian]}`;
+  document.getElementById('g-qnum').textContent = `Soalan ${state.soalanKe}/${max}`;
+  document.getElementById('g-question').textContent = q.text;
+  document.getElementById('g-status').textContent = '';
+  document.getElementById('g-status').className = 'status-msg';
+  document.getElementById('progress-bar').style.width = `${(state.soalanKe-1)/max*100}%`;
+
+  // Render answer buttons
+  const grid = document.getElementById('answer-grid');
+  grid.innerHTML = '';
+  q.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn';
+    btn.style.background = BTN_COLORS[i];
+    btn.textContent = c;
+    btn.onclick = () => handleAnswer(c, btn);
+    grid.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  const lv = getLevel();
+  const limit = LEVEL_CONFIG[lv].masa;
+  timerInterval = setInterval(() => {
+    const elapsed = (Date.now() - state.masaMula) / 1000;
+    const timerEl = document.getElementById('g-timer');
+    if (!timerEl) { clearInterval(timerInterval); return; }
+    timerEl.textContent = `⏱ ${elapsed.toFixed(1)}s`;
+    timerEl.className = elapsed >= limit - 5 ? 'timer warn' : 'timer';
+    if (elapsed >= limit) {
+      clearInterval(timerInterval);
+      handleAnswer(null, null, true);
+    }
+  }, 100);
+}
+
+function handleAnswer(val, btn, timeout=false) {
+  clearInterval(timerInterval);
+  const elapsed = (Date.now() - state.masaMula) / 1000;
+  const ans = state.currentAnswer;
+  const betul = !timeout && parseFloat(val) === parseFloat(ans);
+
+  // Disable all buttons & highlight
+  document.querySelectorAll('.ans-btn').forEach(b => {
+    b.disabled = true;
+    if (!state.modeExam) {
+      if (parseFloat(b.textContent) === parseFloat(ans)) b.classList.add('correct');
+      else b.classList.add('wrong');
+    }
+  });
+
+  if (betul) { handleBetul(elapsed); playSound(sfxCorrect); }
+  else { handleSalah(ans, timeout, elapsed); playSound(sfxWrong); }
+}
+
+function handleBetul(elapsed) {
+  let combo, level, badges;
+  if (state.mode === 'solo') {
+    state.combo++; state.wrongStreak = 0;
+    const bonus = state.combo >= 3 ? LEVEL_CONFIG[state.level].bonus : 0;
+    state.skor += 1 + bonus;
+    combo = state.combo; level = state.level; badges = state.badges;
+    if (combo >= 5 && !badges.includes("Combo King")) badges.push("Combo King");
+    if (elapsed < 3 && !badges.includes("Quick Thinker")) badges.push("Quick Thinker");
+    if (combo % 4 === 0 && state.level < 3) { state.level++; showToast(`⬆️ Level Naik! Level ${state.level}`); }
+    state.rekod.push({q:document.getElementById('g-question').textContent, u:state.currentAnswer, c:state.currentAnswer, t:elapsed, betul:true});
+  } else {
+    const p = state.players[state.currentPlayerIdx];
+    p.combo++; p.wrongStreak = 0;
+    const bonus = p.combo >= 3 ? LEVEL_CONFIG[p.level].bonus : 0;
+    p.skor += 1 + bonus;
+    if (p.combo >= 5 && !p.badges.includes("Combo King")) p.badges.push("Combo King");
+    if (elapsed < 3 && !p.badges.includes("Quick Thinker")) p.badges.push("Quick Thinker");
+    if (p.combo % 4 === 0 && p.level < 3) { p.level++; showToast(`⬆️ ${p.emoji} Level Naik! Level ${p.level}`); }
+    p.rekod.push({q:document.getElementById('g-question').textContent, betul:true, t:elapsed});
+    combo = p.combo; bonus2 = p.combo >= 3 ? LEVEL_CONFIG[p.level].bonus : 0;
+  }
+
+  if (!state.modeExam) {
+    const p2 = state.mode === 'multi' ? state.players[state.currentPlayerIdx] : state;
+    const bonus = p2.combo >= 3 ? LEVEL_CONFIG[p2.level || state.level].bonus : 0;
+    const msg = document.getElementById('g-status');
+    msg.textContent = `✔ Betul! +${1+(p2.combo>=3?bonus:0)} mata${p2.combo>=3?' | 🔥x'+p2.combo:''}`;
+    msg.className = 'status-msg ok';
+  }
+
+  updateStatusBar();
+  updateSkorDisplay();
+  setTimeout(() => soalanSeterusnya(), 1400);
+}
+
+function handleSalah(ans, timeout, elapsed) {
+  if (state.mode === 'solo') {
+    state.combo = 0; state.wrongStreak++;
+    state.nyawa--;
+    if (state.wrongStreak >= 3 && state.level > 1) { state.level--; state.wrongStreak = 0; showToast(`⬇️ Level Turun ke Level ${state.level}`); }
+    state.rekod.push({q:document.getElementById('g-question').textContent, betul:false, t:elapsed});
+  } else {
+    const p = state.players[state.currentPlayerIdx];
+    p.combo = 0; p.wrongStreak++;
+    p.nyawa--;
+    if (p.wrongStreak >= 3 && p.level > 1) { p.level--; p.wrongStreak = 0; showToast(`⬇️ ${p.emoji} Level Turun`); }
+    p.rekod.push({q:document.getElementById('g-question').textContent, betul:false, t:elapsed});
+  }
+
+  if (!state.modeExam) {
+    const nyawa = state.mode === 'solo' ? state.nyawa : state.players[state.currentPlayerIdx].nyawa;
+    const msg = document.getElementById('g-status');
+    msg.textContent = (timeout ? '⏰ Masa Habis!' : `❌ Salah! (Betul: ${ans})`) + ` ${'❤️'.repeat(nyawa)}${'🖤'.repeat(3-nyawa)}`;
+    msg.className = 'status-msg fail';
+  }
+
+  updateStatusBar();
+  updateSkorDisplay();
+
+  const nyawa = state.mode === 'solo' ? state.nyawa : state.players[state.currentPlayerIdx].nyawa;
+  if (nyawa <= 0) {
+    if (state.mode === 'multi') state.players[state.currentPlayerIdx].gameOver = true;
+    setTimeout(() => {
+      if (state.mode === 'solo') showGameOver();
+      else tamatGiliranPemain();
+    }, 1400);
+  } else {
+    setTimeout(() => soalanSeterusnya(), 1400);
+  }
+}
+
+// ==================== END SCREENS ====================
+function showGameOver() {
+  clearInterval(timerInterval);
+  stopMusic();
+  const html = `
+    <p style="font-size:18px;font-weight:800;color:#DC2626">${state.namaPemain}, nyawa anda habis!</p>
+    <p style="font-size:24px;font-weight:800;color:#00C9A7;margin:8px 0">Skor: ${state.skor}</p>
+    ${renderBadgeSummary(state.badges)}`;
+  document.getElementById('go-content').innerHTML = html;
+  saveLeaderboard();
+  showScreen('screen-gameover');
+}
+
+function tamatPermainan() {
+  clearInterval(timerInterval);
+  stopMusic();
+  awardBadges();
+  saveLeaderboard();
+
+  const avg = state.rekod.length ? (state.rekod.reduce((a,r)=>a+r.t,0)/state.rekod.length).toFixed(1) : '—';
+  const html = `
+    <p style="font-size:16px;font-weight:800;color:#FF6B9D">${state.namaPemain} ${getEmoji(state.namaPemain)}</p>
+    <p style="font-size:28px;font-weight:800;color:#00C9A7;margin:4px 0">${state.skor} / ${SOALAN_PER_BAHAGIAN}</p>
+    <p style="font-size:13px;color:#64748B">Nyawa berbaki: ${'❤️'.repeat(state.nyawa)}${'🖤'.repeat(3-state.nyawa)}</p>
+    <p style="font-size:13px;color:#0EA5E9">⏱ Purata masa: ${avg}s</p>
+    <p style="font-size:13px;font-weight:800;color:#1E3A5F">📈 Level terakhir: ${state.level} (${LEVEL_CONFIG[state.level].nama})</p>
+    ${renderBadgeSummary(state.badges)}`;
+  document.getElementById('tamat-content').innerHTML = html;
+  showScreen('screen-tamat');
+}
+
+function tamatGiliranPemain() {
+  clearInterval(timerInterval);
+  const p = state.players[state.currentPlayerIdx];
+
+  // Award badges
+  if (p.skor === SOALAN_PER_BAHAGIAN && !p.badges.includes("Perfect Score")) p.badges.push("Perfect Score");
+  if (p.nyawa === 3 && !p.badges.includes("Survivor")) p.badges.push("Survivor");
+  if (p.level === 3 && !p.badges.includes("Level Master")) p.badges.push("Level Master");
+  if (p.rekod.length) {
+    const avg = p.rekod.reduce((a,r)=>a+r.t,0)/p.rekod.length;
+    if (avg < 5 && !p.badges.includes("Speed Genius")) p.badges.push("Speed Genius");
+  }
+  if (state.bahagian===1 && p.skor===SOALAN_PER_BAHAGIAN && !p.badges.includes("Sifir Master")) p.badges.push("Sifir Master");
+  if (state.bahagian===2 && p.skor===SOALAN_PER_BAHAGIAN && !p.badges.includes("Unit Champion")) p.badges.push("Unit Champion");
+  if (state.bahagian===3 && p.skor===SOALAN_PER_BAHAGIAN && !p.badges.includes("Problem Solver")) p.badges.push("Problem Solver");
+
+  state.currentPlayerIdx++;
+  if (state.currentPlayerIdx >= state.players.length) {
+    saveLeaderboard();
+    showWinner();
+  } else {
+    showTurnScreen();
+  }
+}
+
+function showWinner() {
+  stopMusic();
+  const sorted = [...state.players].sort((a,b) => b.skor - a.skor);
+  const winner = sorted[0];
+  const winIdx = state.players.indexOf(winner);
+  const medals = ["🥇","🥈","🥉","4️⃣"];
+
+  const rankRows = sorted.map((p, i) => {
+    const pIdx = state.players.indexOf(p);
+    const badgeIcons = p.badges.map(b => BADGE_LIST[b]?.icon||'').join('');
+    return `<div class="rank-row" style="background:${P_BG[pIdx%P_BG.length]}">
+      <span>${medals[i]}</span>
+      <span style="font-size:20px">${p.emoji}</span>
+      <span class="rank-name">${p.nama}</span>
+      <span class="rank-pts">${p.skor}pts</span>
+      <span>${'❤️'.repeat(p.nyawa)}${'🖤'.repeat(3-p.nyawa)}</span>
+      <span>${badgeIcons}</span>
+    </div>`;
+  }).join('');
+
+  const isTie = sorted.length > 1 && sorted[0].skor === sorted[1].skor;
+  const html = `
+    <div class="winner-card" style="background:${P_BD[winIdx%P_BD.length]}20;border:3px solid ${P_BD[winIdx%P_BD.length]}">
+      <div class="winner-emoji-big">${winner.emoji}</div>
+      <div style="font-size:14px;font-weight:800;color:#F59E0B">🥇 PEMENANG!</div>
+      <div class="winner-name" style="color:#1E3A5F">${winner.nama}</div>
+      <div style="color:#00C9A7;font-weight:800">Skor: ${winner.skor} / ${SOALAN_PER_BAHAGIAN}</div>
+    </div>
+    <div class="rank-list">${rankRows}</div>
+    ${isTie ? '<p style="text-align:center;font-weight:800;color:#F59E0B;margin:6px">🤝 Seri! Tahniah semua!</p>' : ''}`;
+  document.getElementById('winner-content').innerHTML = html;
+  showScreen('screen-winner');
+}
+
+// ==================== BADGES ====================
+function awardBadges() {
+  const b = state.badges;
+  if (state.skor === SOALAN_PER_BAHAGIAN) {
+    if (state.bahagian===1 && !b.includes("Sifir Master")) b.push("Sifir Master");
+    if (state.bahagian===2 && !b.includes("Unit Champion")) b.push("Unit Champion");
+    if (state.bahagian===3 && !b.includes("Problem Solver")) b.push("Problem Solver");
+    if (!b.includes("Perfect Score")) b.push("Perfect Score");
+  }
+  if (state.rekod.length) {
+    const avg = state.rekod.reduce((a,r)=>a+r.t,0)/state.rekod.length;
+    if (avg < 5 && !b.includes("Speed Genius")) b.push("Speed Genius");
+  }
+  if (state.nyawa === 3 && !b.includes("Survivor")) b.push("Survivor");
+  if (state.level === 3 && !b.includes("Level Master")) b.push("Level Master");
+}
+
+function renderBadgeSummary(badges) {
+  if (!badges || badges.length === 0)
+    return '<p style="font-size:12px;color:#94A3B8;margin:8px 0">(Tiada badge diperoleh)</p>';
+  const items = badges.map(b => {
+    const info = BADGE_LIST[b] || {icon:'🏅',desc:b};
+    return `<div class="badge-item"><span>${info.icon}</span><span><b>${b}</b> — ${info.desc}</span></div>`;
+  }).join('');
+  return `<div class="badge-box"><div class="badge-title">🏆 Badge Diperoleh:</div>${items}</div>`;
+}
+
+// ==================== LEADERBOARD ====================
+function saveLeaderboard() {
+  let lb = JSON.parse(localStorage.getItem('bijak-lb') || '[]');
+  if (state.mode === 'solo') {
+    lb.push({nama: state.namaPemain, skor: state.skor, bahagian: state.bahagian, badges: state.badges});
+  } else {
+    state.players.forEach(p => {
+      lb.push({nama: p.emoji+p.nama, skor: p.skor, bahagian: state.bahagian, badges: p.badges});
+    });
+  }
+  lb.sort((a,b) => b.skor - a.skor);
+  localStorage.setItem('bijak-lb', JSON.stringify(lb.slice(0,50)));
+}
+
+function showLeaderboard() {
+  const lb = JSON.parse(localStorage.getItem('bijak-lb') || '[]');
+  const medals = ["🥇","🥈","🥉"];
+  const top10 = lb.slice(0,10);
+  const html = top10.length === 0
+    ? '<p style="color:#94A3B8;text-align:center">Tiada rekod lagi.</p>'
+    : top10.map((e,i) => {
+        const bdg = (e.badges||[]).map(b=>BADGE_LIST[b]?.icon||'').join('');
+        return `<div class="lb-row">
+          <span>${medals[i]||`${i+1}.`}</span>
+          <span class="lb-name">${e.nama}</span>
+          <span class="lb-pts">${e.skor}pts</span>
+          <span style="font-size:11px;color:#64748B">Bhg ${e.bahagian}</span>
+          <span>${bdg}</span>
+        </div>`;
+      }).join('');
+  document.getElementById('lb-content').innerHTML = html;
+  document.getElementById('modal-lb').classList.add('active');
+}
+
+function showBadgeList() {
+  const html = Object.entries(BADGE_LIST).map(([name,info]) =>
+    `<div style="margin:8px 0">
+      <div style="font-weight:800;font-size:14px">${info.icon} ${name}</div>
+      <div style="font-size:12px;color:#64748B">${info.desc}</div>
+    </div>`
+  ).join('<hr>');
+  document.getElementById('badge-list-content').innerHTML = html;
+  document.getElementById('modal-badges').classList.add('active');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// ==================== TOAST ====================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ==================== UTILS ====================
+function rnd(a, b) { return Math.floor(Math.random()*(b-a+1))+a; }
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
 </script>
-
 </body>
 </html>
