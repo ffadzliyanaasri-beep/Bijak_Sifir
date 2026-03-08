@@ -1,42 +1,85 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="ms">
 <head>
+
 <meta charset="UTF-8">
-<title>Permainan Bijak Sifir</title>
+<title>Bijak Sifir PRO</title>
 
 <style>
 
 body{
 font-family:Arial;
+background:linear-gradient(#74ebd5,#ACB6E5);
 text-align:center;
-background-image:url("main background.jpg");
-background-size:cover;
-color:white;
+margin:0;
+}
+
+#gameBox{
+
+width:520px;
+max-width:90%;
+margin:auto;
+margin-top:40px;
+
+background:white;
+padding:20px;
+border-radius:15px;
+
+box-shadow:0 0 15px rgba(0,0,0,0.2);
+
 }
 
 button{
-padding:14px;
-margin:10px;
-font-size:18px;
-border-radius:10px;
+
+padding:12px;
+margin:6px;
+font-size:16px;
+width:45%;
 border:none;
+border-radius:8px;
 cursor:pointer;
+
+background:#4CAF50;
+color:white;
+
 }
 
-.answer{
-display:block;
-width:220px;
-margin:10px auto;
-background:#4ECDC4;
+button:hover{
+
+background:#43a047;
+
 }
 
-.answer:hover{
-background:#2EA89E;
+#question{
+
+font-size:26px;
+margin:20px;
+
 }
 
-#game{
-display:none;
+.correct{
+
+background:#66BB6A !important;
+
+}
+
+.wrong{
+
+background:#EF5350 !important;
+
+}
+
+.stats{
+
+margin:10px;
+
+}
+
+#badge{
+
+font-size:18px;
+color:#ff9800;
+
 }
 
 </style>
@@ -45,92 +88,221 @@ display:none;
 
 <body>
 
-<h1>🎮 Permainan Bijak Sifir</h1>
+<div id="gameBox">
+
+<h1>🎮 Bijak Sifir PRO</h1>
 
 <div id="menu">
 
-<input id="player" placeholder="Masukkan Nama" style="padding:10px;font-size:18px">
+<input id="p1" placeholder="Pemain 1"><br><br>
+<input id="p2" placeholder="Pemain 2 (optional)"><br><br>
 
-<br><br>
+<button onclick="start('sifir')">Sifir</button>
+<button onclick="start('unit')">Tukar Unit</button>
+<button onclick="start('problem')">Masalah Matematik</button>
 
-<button onclick="startGame(1)">Bahagian 1 (Sifir)</button> <button onclick="startGame(2)">Bahagian 2 (Unit)</button> <button onclick="startGame(3)">Bahagian 3 (Masalah)</button>
+<h3>🏆 Leaderboard</h3>
 
-</div>
-
-<div id="game">
-
-<h2 id="playerName"></h2>
-
-<h3 id="question"></h3>
-
-<div id="answers"></div>
-
-<p>
-
-Skor: <span id="score">0</span> |
-❤️ Nyawa: <span id="life">3</span> |
-🔥 Combo: <span id="combo">0</span> |
-📈 Level: <span id="level">1</span> |
-⏱ Masa: <span id="timer">20</span>
-
-</p>
+<ul id="leader"></ul>
 
 </div>
 
-<audio id="music" src="detective-story-224266.mp3" loop></audio> <audio id="correct" src="correct-356013.mp3"></audio> <audio id="wrong" src="wrong-47985.mp3"></audio>
+<div id="game" style="display:none">
+
+<h3 id="playerTurn"></h3>
+
+<div class="stats">
+
+❤️ <span id="life">3</span>
+🔥 Combo <span id="combo">0</span>
+⭐ Skor <span id="score">0</span>
+
+</div>
+
+<div>
+
+⏱ Masa <span id="time">10</span>s
+
+</div>
+
+<div id="badge"></div>
+
+<div id="question"></div>
+
+<div>
+
+<button id="a0" onclick="choose(0)"></button>
+<button id="a1" onclick="choose(1)"></button>
+
+<br>
+
+<button id="a2" onclick="choose(2)"></button>
+<button id="a3" onclick="choose(3)"></button>
+
+</div>
+
+</div>
+
+</div>
 
 <script>
+
+let players=[]
+let turn=0
 
 let score=0
 let life=3
 let combo=0
 let level=1
-let bahagian=1
-let answer=0
-let timer=20
-let interval
+let correct
 
-function startGame(b){
+let mode=""
 
-let name=document.getElementById("player").value
+let timer
+let timeLeft=10
 
-if(name==""){
-alert("Masukkan nama dahulu")
+function start(m){
+
+let p1=document.getElementById("p1").value
+
+if(p1==""){
+alert("Masukkan nama pemain")
 return
 }
 
-bahagian=b
+let p2=document.getElementById("p2").value
+
+players=[p1]
+
+if(p2!=""){
+players.push(p2)
+}
+
+mode=m
 
 document.getElementById("menu").style.display="none"
 document.getElementById("game").style.display="block"
 
-document.getElementById("playerName").innerText="👤 "+name
-
-document.getElementById("music").play()
+resetPlayer()
 
 nextQuestion()
 
 }
 
+function resetPlayer(){
+
+score=0
+life=3
+combo=0
+level=1
+
+updateUI()
+
+}
+
+function rand(a,b){
+
+return Math.floor(Math.random()*(b-a+1))+a
+
+}
+
+function makeQuestion(){
+
+if(mode=="sifir"){
+
+let a=rand(2,9)
+let b=rand(2,9)
+
+return{
+q:a+" × "+b+" = ?",
+a:a*b
+}
+
+}
+
+if(mode=="unit"){
+
+let v=rand(1,9)
+
+return{
+q:v+" kg = ? g",
+a:v*1000
+}
+
+}
+
+if(mode=="problem"){
+
+let a=rand(5,15)
+let b=rand(1,5)
+
+return{
+q:`Ali ada ${a} epal, beli ${b} lagi`,
+a:a+b
+}
+
+}
+
+}
+
+function nextQuestion(){
+
+let data=makeQuestion()
+
+correct=data.a
+
+document.getElementById("question").innerText=data.q
+
+let arr=[correct]
+
+while(arr.length<4){
+
+let n=correct+rand(-10,10)
+
+if(!arr.includes(n) && n>0)
+arr.push(n)
+
+}
+
+arr.sort(()=>Math.random()-0.5)
+
+for(let i=0;i<4;i++){
+
+let b=document.getElementById("a"+i)
+
+b.innerText=arr[i]
+
+b.className=""
+
+}
+
+timeLeft=10
+
+document.getElementById("playerTurn").innerText="Giliran: "+players[turn]
+
+startTimer()
+
+}
+
 function startTimer(){
 
-clearInterval(interval)
+clearInterval(timer)
 
-timer=20
+timer=setInterval(()=>{
 
-document.getElementById("timer").innerText=timer
+timeLeft--
 
-interval=setInterval(()=>{
+document.getElementById("time").innerText=timeLeft
 
-timer--
+if(timeLeft<=0){
 
-document.getElementById("timer").innerText=timer
+life--
 
-if(timer<=0){
+combo=0
 
-clearInterval(interval)
+updateUI()
 
-wrong()
+nextQuestion()
 
 }
 
@@ -138,130 +310,46 @@ wrong()
 
 }
 
-function nextQuestion(){
+function choose(i){
 
-let q
+clearInterval(timer)
 
-if(bahagian==1) q=sifir()
-if(bahagian==2) q=unit()
-if(bahagian==3) q=problem()
+let btn=document.getElementById("a"+i)
 
-document.getElementById("question").innerText=q.text
+let val=parseInt(btn.innerText)
 
-answer=q.answer
+if(val==correct){
 
-let html=""
+btn.className="correct"
 
-q.choices.forEach(c=>{
-html+=`<button class="answer" onclick="check(${c})">${c}</button>`
-})
+score+=10
 
-document.getElementById("answers").innerHTML=html
-
-startTimer()
-
-}
-
-function sifir(){
-
-let a=rand(2,9)
-let b=rand(2,9)
-
-let ans=a*b
-
-return{
-
-text:a+" × "+b+" = ?",
-
-answer:ans,
-
-choices:shuffle([
-ans,
-ans+rand(1,5),
-ans-rand(1,5),
-ans+rand(6,10)
-])
-
-}
-
-}
-
-function unit(){
-
-let v=rand(1,10)
-
-let ans=v*1000
-
-return{
-
-text:v+" kg = ? g",
-
-answer:ans,
-
-choices:shuffle([
-ans,
-ans+100,
-ans-100,
-ans+500
-])
-
-}
-
-}
-
-function problem(){
-
-return{
-
-text:"Alia ada 32cm + 57cm. Berapa mm?",
-
-answer:890,
-
-choices:shuffle([890,880,900,89])
-
-}
-
-}
-
-function check(v){
-
-clearInterval(interval)
-
-if(v==answer){
-
-document.getElementById("correct").play()
-
-score++
 combo++
 
-if(combo>=5) level++
+if(combo>=3){
+
+document.getElementById("badge").innerText="🔥 Combo Master!"
+score+=10
+
+}
 
 }else{
 
-wrong()
-return
-
-}
-
-update()
-
-nextQuestion()
-
-}
-
-function wrong(){
-
-document.getElementById("wrong").play()
+btn.className="wrong"
 
 life--
+
 combo=0
 
-update()
+}
+
+updateUI()
+
+setTimeout(()=>{
 
 if(life<=0){
 
-alert("Game Over! Skor: "+score)
-location.reload()
+endTurn()
 
 }else{
 
@@ -269,26 +357,80 @@ nextQuestion()
 
 }
 
+},800)
+
 }
 
-function update(){
+function updateUI(){
 
 document.getElementById("score").innerText=score
 document.getElementById("life").innerText=life
 document.getElementById("combo").innerText=combo
-document.getElementById("level").innerText=level
 
 }
 
-function rand(a,b){
-return Math.floor(Math.random()*(b-a+1))+a
+function endTurn(){
+
+saveScore(players[turn],score)
+
+turn++
+
+if(turn>=players.length){
+
+alert("Game Tamat")
+
+location.reload()
+
+}else{
+
+alert("Giliran pemain seterusnya")
+
+resetPlayer()
+
+nextQuestion()
+
 }
 
-function shuffle(arr){
-return arr.sort(()=>Math.random()-0.5)
 }
+
+function saveScore(name,score){
+
+let data=JSON.parse(localStorage.getItem("score")||"[]")
+
+data.push({name:name,score:score})
+
+data.sort((a,b)=>b.score-a.score)
+
+data=data.slice(0,5)
+
+localStorage.setItem("score",JSON.stringify(data))
+
+}
+
+function loadBoard(){
+
+let data=JSON.parse(localStorage.getItem("score")||"[]")
+
+let ul=document.getElementById("leader")
+
+ul.innerHTML=""
+
+data.forEach(p=>{
+
+let li=document.createElement("li")
+
+li.innerText=p.name+" - "+p.score
+
+ul.appendChild(li)
+
+})
+
+}
+
+loadBoard()
 
 </script>
 
 </body>
 </html>
+
