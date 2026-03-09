@@ -3,598 +3,860 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Permainan Bijak Sifir</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Bijak Sifir Online 🎮</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-/* ===== FULL SCREEN BACKGROUND ===== */
-#fullscreen-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-image: url('main background.jpg');
-  transition: background-image 0.6s ease;
+:root {
+  --c1: #FF6B35; --c2: #004E89; --c3: #1A936F; --c4: #C84B31;
+  --gold: #F7B731; --bg: #0A0E1A;
+  --panel: rgba(255,255,255,0.06); --panelB: rgba(255,255,255,0.1);
+  --txt: #F0F4FF; --sub: #8892A4; --r: 16px;
 }
-#fullscreen-bg::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.38);
-  backdrop-filter: blur(1px);
-  -webkit-backdrop-filter: blur(1px);
-}
-
+* { box-sizing:border-box; margin:0; padding:0; }
 body {
-  font-family: 'Nunito', sans-serif;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  position: relative;
+  font-family:'Nunito',sans-serif; background:var(--bg);
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  color:var(--txt); padding:12px;
 }
-
-#app {
-  border-radius: 24px;
-  width: 580px;
-  min-height: 580px;
-  box-shadow: 0 25px 60px rgba(0,0,0,.5);
-  overflow: hidden;
-  position: relative;
-  z-index: 10;
-  /* App panel: semi-transparent frosted glass */
-  background: rgba(255,255,255,0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.6);
+body::before {
+  content:''; position:fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse at 20% 50%,rgba(0,78,137,.35) 0%,transparent 60%),
+    radial-gradient(ellipse at 80% 20%,rgba(255,107,53,.25) 0%,transparent 50%),
+    radial-gradient(ellipse at 60% 80%,rgba(26,147,111,.2) 0%,transparent 50%);
+  animation:bgP 8s ease-in-out infinite alternate;
 }
+@keyframes bgP{from{opacity:.7}to{opacity:1}}
+#app { position:relative; z-index:1; width:100%; max-width:480px; }
+.screen { display:none; animation:fadeUp .3s ease; flex-direction:column; gap:10px; }
+.screen.active { display:flex; }
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 
-/* Remove old app-bg since we use fullscreen now */
-#app-bg { display: none !important; }
+/* LOGO */
+.logo { text-align:center; padding:18px 0 6px; }
+.logo-title {
+  font-family:'Fredoka One',cursive; font-size:36px; letter-spacing:2px;
+  background:linear-gradient(135deg,var(--c1),var(--gold),var(--c3));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  filter:drop-shadow(0 0 18px rgba(255,107,53,.4));
+}
+.logo-sub { font-size:11px; color:var(--sub); font-weight:600; letter-spacing:3px; text-transform:uppercase; margin-top:3px; }
 
-#app-inner { position: relative; z-index: 1; }
-.screen { display:none; animation: fadeUp .25s ease; }
-.screen.active { display:block; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-.hdr { background:linear-gradient(135deg,#667eea,#764ba2); color:white; text-align:center; padding:14px 16px; font-family:'Fredoka One',cursive; font-size:23px; letter-spacing:1px; }
-.hdr small { font-family:'Nunito',sans-serif; font-size:11px; opacity:.8; display:block; }
-.btn { padding:10px 18px; border:none; border-radius:12px; cursor:pointer; font-family:'Nunito',sans-serif; font-weight:800; font-size:13px; transition:all .15s; display:inline-flex; align-items:center; gap:6px; }
-.btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,.2); }
-.btn:active { transform:translateY(0); }
-.btn:disabled { opacity:.5; cursor:default; }
-.btn-purple{background:#7C3AED;color:white} .btn-teal{background:#00C9A7;color:white}
-.btn-pink{background:#FF6B9D;color:white}   .btn-blue{background:#0EA5E9;color:white}
-.btn-grey{background:#E2E8F0;color:#334155} .btn-green{background:#16A34A;color:white}
-.btn-red{background:#EF4444;color:white}    .btn-amber{background:#F59E0B;color:white}
-.btn-full{width:100%;justify-content:center;margin:4px 0}
-.btn-sm{padding:5px 10px;font-size:11px}
-.f-label{font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:4px}
-input[type=text]{width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:13px;outline:none;transition:border .2s}
-input[type=text]:focus{border-color:#7C3AED}
-.sec-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
-.sec-btn{padding:12px 6px;border:3px solid transparent;border-radius:14px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:12px;text-align:center;line-height:1.5;transition:all .2s}
-.sec-btn:hover{transform:scale(1.04);box-shadow:0 4px 14px rgba(0,0,0,.15)}
-.sec-btn.b1{background:#FFE4E1;border-color:#FF6B6B;color:#9B1C1C}
-.sec-btn.b2{background:#E1F5FE;border-color:#4ECDC4;color:#164E63}
-.sec-btn.b3{background:#FFF9C4;border-color:#F59E0B;color:#78350F}
-.game-wrap{display:flex;min-height:520px}
-.game-left{flex:1;padding:8px 12px 12px;min-width:0}
-.game-right{width:148px;min-width:148px;background:#F5F0FF;border-left:2px solid #E0D4FF;display:none;flex-direction:column}
-.game-right.show{display:flex}
-.live-hdr{background:#7C3AED;color:white;font-family:'Fredoka One',cursive;font-size:13px;text-align:center;padding:8px 4px;letter-spacing:.5px}
-.live-body{flex:1;overflow-y:auto;padding:6px 5px}
-.live-row{border-radius:10px;padding:5px 7px;margin-bottom:5px;transition:all .3s}
-.live-row.cur{box-shadow:0 0 0 2px #7C3AED}
-.lr-top{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:800}
-.lr-skor{margin-left:auto;color:#00C9A7;font-weight:800}
-.lr-bot{font-size:10px;font-weight:600;margin-top:2px}
-.status-bar{display:flex;align-items:center;gap:6px;background:#F8F0FF;border-radius:10px;padding:5px 8px;margin:4px 0;font-size:11px;font-weight:700}
-.lv-badge{padding:2px 7px;border-radius:7px;font-size:10px;font-weight:800;margin-left:auto}
-.q-sec{color:#A78BFA;font-weight:800;font-size:11px;margin:3px 0 1px}
-.q-num{color:#F97316;font-size:11px;font-weight:700}
-.q-text{background:#F0F4FF;border-left:4px solid #7C3AED;border-radius:0 12px 12px 0;padding:10px 12px;font-size:13px;font-weight:700;color:#1E3A5F;min-height:52px;line-height:1.5;margin:5px 0}
-.prog-wrap{background:#E5E7EB;border-radius:99px;height:6px;margin:4px 0;overflow:hidden}
-.prog-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,#7C3AED,#EC4899);transition:width .4s}
-.ans-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:5px 0}
-.ans-btn{padding:12px 6px;border:none;border-radius:13px;cursor:pointer;color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,.15);transition:all .15s}
-.ans-btn:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.2)}
+/* CARDS */
+.card { background:var(--panel); border:1px solid rgba(255,255,255,.1); border-radius:var(--r); padding:16px; backdrop-filter:blur(10px); }
+.card-title { font-family:'Fredoka One',cursive; font-size:15px; color:var(--gold); margin-bottom:10px; letter-spacing:1px; }
+
+/* BUTTONS */
+.btn {
+  padding:13px 18px; border:none; border-radius:14px; cursor:pointer;
+  font-family:'Nunito',sans-serif; font-weight:800; font-size:14px;
+  transition:all .2s; display:inline-flex; align-items:center; justify-content:center; gap:7px; width:100%;
+}
+.btn:hover:not(:disabled){transform:translateY(-3px);filter:brightness(1.1);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.btn:active{transform:translateY(0)} .btn:disabled{opacity:.4;cursor:default}
+.btn-orange{background:linear-gradient(135deg,#FF6B35,#FF8C42);color:white}
+.btn-blue{background:linear-gradient(135deg,#004E89,#0077C2);color:white}
+.btn-green{background:linear-gradient(135deg,#1A936F,#2ECC71);color:white}
+.btn-gold{background:linear-gradient(135deg,#F7B731,#FFA502);color:#1A0A00}
+.btn-ghost{background:var(--panelB);color:var(--txt);border:1px solid rgba(255,255,255,.15)}
+.btn-red{background:linear-gradient(135deg,#C84B31,#E74C3C);color:white}
+.btn-sm{padding:8px 14px;font-size:12px;width:auto;border-radius:10px}
+.row{display:flex;gap:8px} .row .btn{flex:1}
+
+/* INPUTS */
+.f-label{font-size:11px;font-weight:700;color:var(--sub);display:block;margin-bottom:5px;letter-spacing:1px;text-transform:uppercase}
+input[type=text]{
+  width:100%; padding:11px 14px;
+  background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.1);
+  border-radius:12px; color:var(--txt);
+  font-family:'Nunito',sans-serif; font-size:14px; font-weight:700; outline:none; transition:border .2s;
+}
+input[type=text]:focus{border-color:var(--c1)}
+input[type=text]::placeholder{color:var(--sub);font-weight:600}
+
+/* SETUP BOX */
+.setup-box {
+  background:linear-gradient(135deg,rgba(255,107,53,.12),rgba(247,183,49,.08));
+  border:2px dashed rgba(255,107,53,.4); border-radius:var(--r); padding:16px;
+}
+.setup-step {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:7px 0; border-bottom:1px solid rgba(255,255,255,.06); font-size:13px; line-height:1.6;
+}
+.setup-step:last-child{border-bottom:none}
+.step-num {
+  min-width:26px; height:26px; background:var(--c1); border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Fredoka One',cursive; font-size:13px; color:white; margin-top:1px;
+}
+.step-text{color:var(--txt)} .step-text b{color:var(--gold)}
+.step-text code{background:rgba(0,0,0,.3);padding:1px 6px;border-radius:5px;font-family:monospace;font-size:11px;color:#7DF9B6}
+.api-input-wrap{display:flex;gap:8px;align-items:center;margin-top:6px}
+.api-input-wrap input{flex:1;font-size:12px;padding:8px 12px}
+.link-btn{color:var(--gold);font-size:12px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.link-btn:hover{text-decoration:underline}
+
+/* ROOM CODE */
+.room-code-display{display:flex;gap:7px;justify-content:center;margin:10px 0}
+.rc-digit{
+  width:54px;height:64px; background:linear-gradient(135deg,rgba(247,183,49,.15),rgba(255,107,53,.1));
+  border:2px solid var(--gold); border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive;font-size:30px;color:var(--gold);
+  animation:dglow 2s ease-in-out infinite alternate;
+}
+@keyframes dglow{from{box-shadow:0 0 10px rgba(247,183,49,.2)}to{box-shadow:0 0 25px rgba(247,183,49,.55)}}
+
+/* CODE INPUT */
+.code-input-wrap{display:flex;gap:7px;justify-content:center;margin:10px 0}
+.code-digit-input{
+  width:56px;height:66px;text-align:center;
+  background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);
+  border-radius:14px;color:var(--txt);
+  font-family:'Fredoka One',cursive;font-size:28px;outline:none;
+  transition:border .2s,box-shadow .2s;caret-color:transparent;
+}
+.code-digit-input:focus{border-color:var(--c1);box-shadow:0 0 16px rgba(255,107,53,.3)}
+
+/* SECTION SELECT */
+.sec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sec-card{
+  padding:13px 6px;border-radius:14px;cursor:pointer;
+  text-align:center;font-weight:800;font-size:12px;border:2px solid transparent;
+  transition:all .2s;line-height:1.7;
+}
+.sec-card:hover{transform:scale(1.04)}
+.sec-card.s1{background:rgba(255,107,53,.15);border-color:rgba(255,107,53,.3);color:#FF8C42}
+.sec-card.s2{background:rgba(0,78,137,.2);border-color:rgba(0,119,194,.3);color:#4FC3F7}
+.sec-card.s3{background:rgba(26,147,111,.15);border-color:rgba(26,147,111,.3);color:#2ECC71}
+.sec-card.selected{border-width:3px;filter:brightness(1.3);transform:scale(1.05)}
+
+/* PLAYER LIST */
+.player-list{display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto}
+.player-row{display:flex;align-items:center;gap:9px;background:var(--panelB);border-radius:12px;padding:8px 12px;animation:fadeUp .2s ease}
+.p-emoji{font-size:20px;min-width:26px} .p-name{flex:1;font-weight:700;font-size:13px}
+.p-host{font-size:10px;background:var(--gold);color:#1A0A00;padding:2px 6px;border-radius:5px;font-weight:800}
+.p-you{font-size:10px;background:var(--c3);color:white;padding:2px 6px;border-radius:5px;font-weight:800}
+
+/* GAME */
+.g-header{display:flex;align-items:center;gap:8px;padding:4px 0}
+.g-logo{font-family:'Fredoka One',cursive;font-size:15px;color:var(--gold)}
+.g-room{font-size:11px;color:var(--sub);margin-left:auto}
+.info-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border-radius:8px;padding:3px 9px;font-size:11px;color:var(--sub);font-weight:600}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--c3);box-shadow:0 0 8px var(--c3);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.prog-wrap{height:5px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden;margin:4px 0 8px}
+.prog-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--c1),var(--gold));transition:width .4s}
+.q-meta{display:flex;align-items:center;gap:7px;font-size:11px;margin-bottom:5px}
+.q-badge{padding:3px 9px;border-radius:7px;font-weight:800;font-size:11px}
+.nyawa-d{color:#FF6B6B;font-size:13px;margin-left:auto} .combo-d{color:var(--gold);font-size:11px;font-weight:800}
+.lv-d{padding:2px 7px;border-radius:6px;font-size:10px;font-weight:800}
+.q-box{
+  background:linear-gradient(135deg,rgba(0,78,137,.3),rgba(26,147,111,.2));
+  border:1px solid rgba(255,255,255,.12);border-left:4px solid var(--c1);
+  border-radius:0 14px 14px 0;padding:14px;font-size:14px;font-weight:700;
+  color:var(--txt);min-height:58px;line-height:1.5;margin:6px 0;
+}
+.ans-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0}
+.ans-btn{
+  padding:14px 8px;border:none;border-radius:14px;cursor:pointer;
+  color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;
+  transition:all .15s;box-shadow:0 4px 14px rgba(0,0,0,.3);
+}
+.ans-btn:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.4)}
 .ans-btn:disabled{cursor:default}
 .ans-btn.correct{background:#16A34A!important;animation:pop .35s ease}
 .ans-btn.wrong{background:#DC2626!important}
-@keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
-.g-footer{display:flex;align-items:center;gap:6px;padding:5px 0 2px;font-size:11px;font-weight:700}
-.timer{color:#0EA5E9} .timer.warn{color:#EF4444;animation:blink .5s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
-.g-status{flex:1;font-size:10px}
-.g-status.ok{color:#16A34A} .g-status.fail{color:#DC2626}
-.g-skor{color:#00C9A7;margin-left:auto}
-.g-topbar{display:flex;align-items:center;gap:6px;padding:7px 10px;font-size:12px;font-weight:700;border-bottom:1px solid rgba(0,0,0,.06);background:rgba(255,255,255,.9)}
-.turn-emoji{font-size:68px;animation:bounce 1s infinite;display:block}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-.turn-name{font-family:'Fredoka One',cursive;font-size:25px;color:#1E3A5F;margin:6px 0}
-.mini-scores{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0}
-.mini-card{padding:4px 9px;border-radius:9px;font-size:11px;font-weight:700;border:2px solid transparent}
-.rank-row{display:flex;align-items:center;padding:7px 10px;gap:8px;font-size:12px;font-weight:700}
-.rk-name{flex:1} .rk-pts{color:#00C9A7}
-.badge-box{background:#F3E8FF;border-radius:12px;padding:10px 12px;margin:7px 0}
-.badge-ttl{color:#7C3AED;font-weight:800;font-size:12px;margin-bottom:5px}
-.badge-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#5B21B6;padding:2px 0;font-weight:600}
-.p-list{max-height:165px;overflow-y:auto;padding:4px 0}
-.p-row{display:flex;align-items:center;gap:8px;padding:3px 8px}
-.p-emoji{font-size:18px;min-width:24px}
-.lb-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;margin:3px 0;background:#F8F8F8;font-size:12px;font-weight:700}
-.lb-name{flex:1} .lb-pts{color:#00C9A7}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
-.modal-bg.on{display:flex}
-.modal-box{background:white;border-radius:20px;padding:22px;max-width:400px;width:92%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:fadeUp .2s ease}
-.modal-ttl{font-family:'Fredoka One',cursive;font-size:20px;color:#1E3A5F;margin-bottom:10px}
-.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-70px);background:#1E3A5F;color:white;padding:9px 20px;border-radius:99px;font-weight:700;font-size:13px;z-index:999;transition:transform .3s;white-space:nowrap}
+@keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.g-footer{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;padding:3px 0}
+.timer{color:#38BDF8} .timer.warn{color:#EF4444;animation:blink .5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.g-msg{flex:1;font-size:11px} .g-msg.ok{color:#2ECC71} .g-msg.fail{color:#EF4444}
+.g-skor{color:var(--gold);font-weight:800}
+
+/* LIVE BOARD */
+.live-title{font-family:'Fredoka One',cursive;font-size:12px;color:var(--sub);letter-spacing:1px;margin-bottom:5px}
+.live-rows{display:flex;flex-direction:column;gap:4px;max-height:150px;overflow-y:auto}
+.live-row{display:flex;align-items:center;gap:8px;background:var(--panelB);border-radius:10px;padding:5px 10px;font-size:11px;font-weight:700;transition:all .3s}
+.live-row.me{border:1px solid var(--gold);background:rgba(247,183,49,.08)}
+.lr-rank{font-family:'Fredoka One',cursive;font-size:13px;min-width:18px}
+.lr-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lr-pts{color:var(--gold)} .lr-ny{color:#FF6B6B;font-size:10px}
+
+/* WAITING */
+.wait-wrap{text-align:center;padding:24px 0}
+.wait-emoji{font-size:60px;animation:bounce 1.2s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.wait-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--gold);margin:10px 0 3px}
+.wait-sub{font-size:12px;color:var(--sub)}
+
+/* RESULT */
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:12px 0}
+.pod{text-align:center;border-radius:14px 14px 0 0;padding:10px 6px;min-width:90px}
+.pod.p1{background:linear-gradient(135deg,rgba(247,183,49,.3),rgba(247,183,49,.1));border:2px solid var(--gold);height:120px}
+.pod.p2{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);height:90px}
+.pod.p3{background:rgba(200,75,49,.15);border:1px solid rgba(200,75,49,.3);height:70px}
+.pod-emoji{font-size:26px} .pod-name{font-size:11px;font-weight:800;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pod-pts{font-size:13px;font-weight:800;color:var(--gold)}
+.res-row{display:flex;align-items:center;gap:9px;padding:7px 11px;border-radius:12px;margin:3px 0;background:var(--panelB);font-size:12px;font-weight:700}
+.res-row.me{border:1px solid var(--gold)}
+.badge-box{background:rgba(247,183,49,.08);border:1px solid rgba(247,183,49,.25);border-radius:12px;padding:10px 13px}
+.badge-title{font-size:11px;color:var(--gold);font-weight:800;margin-bottom:5px;letter-spacing:1px;text-transform:uppercase}
+.badge-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--txt);padding:2px 0}
+
+/* MISC */
+.divider{border:none;border-top:1px solid rgba(255,255,255,.07)}
+.txt-center{text-align:center} .txt-sub{color:var(--sub);font-size:12px;font-weight:600}
+.mt8{margin-top:8px} .err-txt{color:#EF4444;font-size:12px;font-weight:700;min-height:18px}
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-80px);background:#1E293B;color:white;padding:9px 22px;border-radius:99px;font-weight:700;font-size:13px;z-index:999;transition:transform .3s;white-space:nowrap;border:1px solid rgba(255,255,255,.15);box-shadow:0 8px 24px rgba(0,0,0,.5)}
 .toast.show{transform:translateX(-50%) translateY(0)}
-.pad{padding:14px 16px}
-hr{border:none;border-top:1px solid #E5E7EB;margin:10px 0}
-.row{display:flex;gap:8px} .row .btn{flex:1;justify-content:center}
-.mt6{margin-top:6px} .info-box{background:#FFF9E6;border-radius:10px;padding:6px 12px;font-size:11px;color:#F97316;font-weight:700;text-align:center;margin:6px 0}
+.connected-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#EF4444;margin-right:4px;transition:background .3s}
+.connected-dot.on{background:var(--c3);box-shadow:0 0 8px var(--c3)}
 </style>
 </head>
 <body>
-
-<!-- FULL SCREEN BACKGROUND -->
-<div id="fullscreen-bg"></div>
-
 <div id="app">
-  <div id="app-bg"></div>
-  <div id="app-inner">
 
-  <div id="s-menu" class="screen active">
-    <div class="hdr">🎮 Permainan Bijak Sifir<small>Matematik Seronok & Mencabar!</small></div>
-    <div class="pad">
-      <div class="row" style="margin:10px 0 6px">
-        <button class="btn btn-blue" onclick="go('s-solo')">👤 Solo</button>
-        <button class="btn btn-green" onclick="go('s-multi')">👥 Multiplayer</button>
-      </div>
-      <div class="info-box">❤️ 3 Nyawa &nbsp;|&nbsp; 🔥 Combo &nbsp;|&nbsp; 📈 Level Auto &nbsp;|&nbsp; 🏆 Badge</div>
-      <hr>
-      <button class="btn btn-purple btn-full" onclick="openLB()">🏆 Leaderboard</button>
-      <button class="btn btn-grey btn-full mt6" onclick="openBadges()">📖 Senarai Badge</button>
+<!-- ══════ SETUP ══════ -->
+<div id="s-setup" class="screen active">
+  <div class="logo">
+    <div class="logo-title">🎮 Bijak Sifir</div>
+    <div class="logo-sub">Multiplayer Online · Percuma · Mudah</div>
+  </div>
+  <div class="setup-box">
+    <div style="font-family:'Fredoka One',cursive;font-size:16px;color:var(--gold);margin-bottom:10px">⚡ Setup Ably (1 minit sahaja!)</div>
+    <div class="setup-step">
+      <div class="step-num">1</div>
+      <div class="step-text">Pergi ke <a href="https://ably.com/signup" target="_blank" class="link-btn">ably.com/signup ↗</a> — daftar percuma, <b>tiada kad kredit</b></div>
     </div>
-  </div>
-
-  <div id="s-solo" class="screen">
-    <div class="hdr">👤 Mod Solo</div>
-    <div class="pad">
-      <label class="f-label">Nama Pemain:</label>
-      <input type="text" id="solo-name" placeholder="Masukkan nama anda...">
-      <label style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:12px;font-weight:600;color:#64748B;cursor:pointer">
-        <input type="checkbox" id="exam-solo" style="width:15px;height:15px;accent-color:#7C3AED"> Mode Peperiksaan
-      </label>
-      <hr>
-      <div style="font-weight:800;color:#A78BFA;font-size:13px;margin-bottom:6px">Pilih Bahagian:</div>
-      <div class="sec-btns">
-        <button class="sec-btn b1" onclick="startSolo(1)">📐 Bahagian 1<br><small>Sifir</small></button>
-        <button class="sec-btn b2" onclick="startSolo(2)">📏 Bahagian 2<br><small>Tukar Unit</small></button>
-        <button class="sec-btn b3" onclick="startSolo(3)">🧮 Bahagian 3<br><small>Masalah</small></button>
-      </div>
-      <button class="btn btn-grey btn-full mt6" onclick="go('s-menu')">← Balik</button>
+    <div class="setup-step">
+      <div class="step-num">2</div>
+      <div class="step-text">Selepas log masuk, klik <b>Apps</b> → pilih app anda → klik tab <b>API Keys</b></div>
     </div>
-  </div>
-
-  <div id="s-multi" class="screen">
-    <div class="hdr">👥 Mod Multiplayer</div>
-    <div class="pad">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <span style="font-weight:700;font-size:13px;color:#64748B">Pemain:</span>
-        <span id="mp-count" style="font-family:'Fredoka One',cursive;font-size:22px;color:#7C3AED;min-width:28px">2</span>
-        <button class="btn btn-green btn-sm" onclick="addPlayer()">➕ Tambah</button>
-        <button class="btn btn-red btn-sm" onclick="removePlayer()">➖ Kurang</button>
-        <span style="font-size:11px;color:#94A3B8">(min 2)</span>
-      </div>
-      <div style="background:#F0FFF4;border:2px solid #D1FAE5;border-radius:12px;padding:8px">
-        <div style="font-weight:800;font-size:12px;color:#065F46;margin-bottom:5px">Nama Pemain:</div>
-        <div class="p-list" id="p-list"></div>
-      </div>
-      <label style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:12px;font-weight:600;color:#64748B;cursor:pointer">
-        <input type="checkbox" id="exam-mp" style="width:15px;height:15px;accent-color:#7C3AED"> Mode Peperiksaan
-      </label>
-      <hr>
-      <div style="font-weight:800;color:#A78BFA;font-size:13px;margin-bottom:6px">Pilih Bahagian:</div>
-      <div class="sec-btns">
-        <button class="sec-btn b1" onclick="startMulti(1)">📐 Bahagian 1<br><small>Sifir</small></button>
-        <button class="sec-btn b2" onclick="startMulti(2)">📏 Bahagian 2<br><small>Tukar Unit</small></button>
-        <button class="sec-btn b3" onclick="startMulti(3)">🧮 Bahagian 3<br><small>Masalah</small></button>
-      </div>
-      <button class="btn btn-grey btn-full mt6" onclick="go('s-menu')">← Balik</button>
+    <div class="setup-step">
+      <div class="step-num">3</div>
+      <div class="step-text">Salin <b>API Key</b> (bermula dengan <code>xxxxx.xxxxx:xxxxxxxx</code>) dan tampal di sini:</div>
     </div>
-  </div>
-
-  <div id="s-turn" class="screen"><div id="turn-body"></div></div>
-
-  <div id="s-game" class="screen">
-    <div class="g-topbar" id="g-topbar"></div>
-    <div class="game-wrap">
-      <div class="game-left">
-        <div class="prog-wrap"><div class="prog-bar" id="g-prog" style="width:0%"></div></div>
-        <div class="status-bar">
-          <span id="g-nyawa" style="color:#EF4444">❤️❤️❤️</span>
-          <span id="g-combo" style="color:#F59E0B">🔥 —</span>
-          <span class="lv-badge" id="g-lv" style="background:#90EE90">📈 L1</span>
-        </div>
-        <div class="q-sec" id="g-sec">Bahagian 1</div>
-        <div class="q-num" id="g-qnum">Soalan 1/10</div>
-        <div class="q-text" id="g-q">—</div>
-        <div class="ans-grid" id="g-ans"></div>
-        <div class="g-footer">
-          <span class="timer" id="g-timer">⏱ 0.0s</span>
-          <span class="g-status" id="g-msg"></span>
-          <span class="g-skor" id="g-skor">Skor: 0</span>
-        </div>
-      </div>
-      <div class="game-right" id="live-panel">
-        <div class="live-hdr">🏆 Skor Live</div>
-        <div class="live-body" id="live-body"></div>
-      </div>
+    <div class="api-input-wrap">
+      <input type="text" id="ably-key" placeholder="Contoh: abc123.def456:GHijKLmnoPQR..." style="font-size:12px">
+      <button class="btn btn-gold btn-sm" onclick="saveKey()" style="white-space:nowrap">Simpan ✓</button>
     </div>
+    <div class="err-txt mt8" id="key-err"></div>
   </div>
-
-  <div id="s-over" class="screen">
-    <div class="hdr" style="background:linear-gradient(135deg,#DC2626,#F97316)">💔 Game Over!</div>
-    <div class="pad" id="over-body"></div>
-  </div>
-
-  <div id="s-tamat" class="screen">
-    <div class="hdr" style="background:linear-gradient(135deg,#16A34A,#0EA5E9)">🎉 Tamat!</div>
-    <div class="pad" id="tamat-body"></div>
-  </div>
-
-  <div id="s-winner" class="screen">
-    <div class="hdr" style="background:linear-gradient(135deg,#F59E0B,#EF4444)">🏆 Keputusan Akhir!</div>
-    <div class="pad" id="win-body"></div>
-  </div>
-
+  <div class="card txt-center">
+    <div class="txt-sub">✅ Ably percuma untuk 6 juta mesej/bulan<br>Cukup untuk berpuluh-puluh game sehari!</div>
   </div>
 </div>
 
+<!-- ══════ MENU ══════ -->
+<div id="s-menu" class="screen">
+  <div class="logo">
+    <div class="logo-title">🎮 Bijak Sifir</div>
+    <div class="logo-sub">Multiplayer Online · Real-time</div>
+  </div>
+  <div class="card">
+    <label class="f-label">Nama Anda</label>
+    <input type="text" id="menu-name" placeholder="Masukkan nama pemain...">
+    <div style="margin-top:8px;font-size:11px;color:var(--sub)">
+      <span class="connected-dot" id="conn-dot"></span>
+      <span id="conn-status">Menghubung...</span>
+    </div>
+  </div>
+  <button class="btn btn-orange" onclick="goCreate()">🏠 Buat Bilik Baru</button>
+  <button class="btn btn-blue" onclick="goJoin()">🚪 Sertai Bilik</button>
+  <hr class="divider">
+  <button class="btn btn-ghost" onclick="goSetup()">⚙️ Tukar API Key</button>
+</div>
+
+<!-- ══════ CREATE ══════ -->
+<div id="s-create" class="screen">
+  <div class="logo" style="padding:12px 0 4px"><div class="logo-title" style="font-size:26px">🏠 Buat Bilik</div></div>
+  <div class="card">
+    <div class="card-title">📚 Pilih Bahagian</div>
+    <div class="sec-grid">
+      <div class="sec-card s1" onclick="selSec(1)">📐<br>Bahagian 1<br><small style="font-weight:600;color:var(--sub)">Sifir</small></div>
+      <div class="sec-card s2" onclick="selSec(2)">📏<br>Bahagian 2<br><small style="font-weight:600;color:var(--sub)">Tukar Unit</small></div>
+      <div class="sec-card s3" onclick="selSec(3)">🧮<br>Bahagian 3<br><small style="font-weight:600;color:var(--sub)">Masalah</small></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">⚙️ Tetapan</div>
+    <label class="f-label">Bilangan Soalan</label>
+    <div class="row" style="margin-bottom:10px">
+      <button class="btn btn-ghost btn-sm" onclick="setQN(5)" id="qn-5">5</button>
+      <button class="btn btn-ghost btn-sm" onclick="setQN(10)" id="qn-10" style="border:2px solid var(--gold)">10</button>
+      <button class="btn btn-ghost btn-sm" onclick="setQN(15)" id="qn-15">15</button>
+      <button class="btn btn-ghost btn-sm" onclick="setQN(20)" id="qn-20">20</button>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer">
+      <input type="checkbox" id="exam-mode" style="width:15px;height:15px;accent-color:var(--c1)"> Mode Peperiksaan
+    </label>
+  </div>
+  <div class="row"><button class="btn btn-ghost" onclick="go('s-menu')">← Balik</button><button class="btn btn-gold" onclick="createRoom()">✨ Buat Bilik</button></div>
+</div>
+
+<!-- ══════ JOIN ══════ -->
+<div id="s-join" class="screen">
+  <div class="logo" style="padding:12px 0 4px"><div class="logo-title" style="font-size:26px">🚪 Sertai Bilik</div></div>
+  <div class="card txt-center">
+    <div class="card-title">Masukkan Kod Bilik 4 Digit</div>
+    <div class="code-input-wrap">
+      <input class="code-digit-input" id="cd0" maxlength="1" oninput="codeIn(0)" onkeydown="codeBk(event,0)">
+      <input class="code-digit-input" id="cd1" maxlength="1" oninput="codeIn(1)" onkeydown="codeBk(event,1)">
+      <input class="code-digit-input" id="cd2" maxlength="1" oninput="codeIn(2)" onkeydown="codeBk(event,2)">
+      <input class="code-digit-input" id="cd3" maxlength="1" oninput="codeIn(3)" onkeydown="codeBk(event,3)">
+    </div>
+    <div class="err-txt" id="join-err"></div>
+  </div>
+  <div class="row"><button class="btn btn-ghost" onclick="go('s-menu')">← Balik</button><button class="btn btn-blue" onclick="joinRoom()">🚀 Masuk</button></div>
+</div>
+
+<!-- ══════ LOBBY ══════ -->
+<div id="s-lobby" class="screen">
+  <div class="card txt-center">
+    <div style="font-size:11px;color:var(--sub);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px">Kod Bilik</div>
+    <div class="room-code-display" id="lobby-code"></div>
+    <div style="font-size:11px;color:var(--sub);margin-top:5px">Kongsi kod ini kepada rakan anda 📲</div>
+  </div>
+  <div class="card">
+    <div class="card-title">👥 Pemain <span id="lobby-count" style="color:var(--sub);font-size:13px;font-weight:600"></span></div>
+    <div class="player-list" id="lobby-players"></div>
+  </div>
+  <div class="card" id="lobby-cfg-card">
+    <div class="card-title">📋 Tetapan</div>
+    <div id="lobby-cfg" style="font-size:12px;color:var(--sub);line-height:2.2"></div>
+  </div>
+  <div id="host-btn-wrap"><button class="btn btn-green" onclick="hostStart()" id="start-btn">▶ Mula Permainan</button></div>
+  <div id="guest-wait" class="txt-center txt-sub" style="display:none">⏳ Menunggu host untuk mula...</div>
+  <button class="btn btn-ghost" onclick="leaveRoom()">🚪 Keluar</button>
+</div>
+
+<!-- ══════ GAME ══════ -->
+<div id="s-game" class="screen">
+  <div class="g-header">
+    <div class="g-logo">🎮 Bijak Sifir</div>
+    <div class="info-tag"><div class="status-dot"></div><span id="g-players-count">—</span></div>
+    <div class="g-room" id="g-room">#0000</div>
+  </div>
+  <div class="prog-wrap"><div class="prog-bar" id="g-prog" style="width:0%"></div></div>
+  <div class="q-meta">
+    <span class="q-badge" id="g-sec-badge">Bahagian 1</span>
+    <span style="color:var(--sub);font-size:11px;font-weight:700" id="g-qnum">1/10</span>
+    <span class="combo-d" id="g-combo">🔥 —</span>
+    <span class="nyawa-d" id="g-nyawa">❤️❤️❤️</span>
+    <span class="lv-d" id="g-lv" style="background:rgba(144,238,144,.2);color:#90EE90">L1</span>
+  </div>
+  <div class="q-box" id="g-q">Memuat soalan...</div>
+  <div class="ans-grid" id="g-ans"></div>
+  <div class="g-footer">
+    <span class="timer" id="g-timer">⏱ 0.0s</span>
+    <span class="g-msg" id="g-msg"></span>
+    <span class="g-skor" id="g-skor">0 pts</span>
+  </div>
+  <div style="margin-top:8px">
+    <div class="live-title">🏆 KEDUDUKAN LIVE</div>
+    <div class="live-rows" id="live-rows"></div>
+  </div>
+</div>
+
+<!-- ══════ WAITING ══════ -->
+<div id="s-wait" class="screen">
+  <div class="wait-wrap">
+    <div class="wait-emoji" id="wait-emoji">🎉</div>
+    <div class="wait-title" id="wait-title">Selesai!</div>
+    <div class="wait-sub" id="wait-sub">Menunggu pemain lain...</div>
+  </div>
+  <div class="card">
+    <div class="live-title">🏆 KEDUDUKAN SEMASA</div>
+    <div class="live-rows" id="wait-rows"></div>
+  </div>
+</div>
+
+<!-- ══════ RESULT ══════ -->
+<div id="s-result" class="screen">
+  <div class="logo" style="padding:12px 0 4px"><div class="logo-title" style="font-size:28px">🏆 Keputusan!</div></div>
+  <div class="podium" id="res-podium"></div>
+  <div class="card"><div id="res-rows"></div></div>
+  <div id="res-badges"></div>
+  <div class="row mt8">
+    <button class="btn btn-ghost" onclick="backMenu()">🏠 Menu</button>
+    <button class="btn btn-gold" onclick="playAgain()">🔄 Main Lagi</button>
+  </div>
+</div>
+
+</div><!-- #app -->
 <div class="toast" id="toast"></div>
 
-<div class="modal-bg" id="m-lb">
-  <div class="modal-box">
-    <div class="modal-ttl">🏆 Leaderboard</div>
-    <div id="lb-body"></div>
-    <button class="btn btn-grey btn-full mt6" onclick="closeM('m-lb')">Tutup</button>
-  </div>
-</div>
-
-<div class="modal-bg" id="m-bdg">
-  <div class="modal-box">
-    <div class="modal-ttl">📖 Senarai Badge</div>
-    <div id="bdg-body"></div>
-    <button class="btn btn-grey btn-full mt6" onclick="closeM('m-bdg')">Tutup</button>
-  </div>
-</div>
-
 <script>
-const FILES={
-  mainBg:'main background.jpg',
-  bg:{1:'first background.jpg',2:'second background.jpg',3:'Escuela.jpg'},
-  music:'detective-story-224266.mp3',
-  ok:'correct-356013.mp3',
-  wrong:'wrong-47985.mp3'
-};
-const music=new Audio(FILES.music);music.loop=true;music.volume=0.45;
-const sfxOk=new Audio(FILES.ok);
-const sfxWrong=new Audio(FILES.wrong);
-function playMusic(){if(!G.exam){music.currentTime=0;music.play().catch(()=>{});}}
-function stopMusic(){music.pause();music.currentTime=0;}
-function playSfx(s){if(!G.exam){s.currentTime=0;s.play().catch(()=>{});}}
+// ═══════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════
+const EMOJIS=['🦁','🐯','🐻','🦊','🐼','🐸','🦄','🐲','🦋','🐬','🦅','🐺','🦖','🐙','🦩','🐧','🐮','🐷','🐨','🦒','🦓','🦏','🦛','🐘','🦘','🦙','🐉','🦤','🐡','🦜'];
+const ABTNS=['#FF6B35','#004E89','#1A936F','#C84B31'];
+const LV={1:{n:'Mudah',t:30,b:1,bg:'rgba(144,238,144,.2)',tc:'#90EE90'},2:{n:'Sederhana',t:20,b:2,bg:'rgba(255,215,0,.2)',tc:'#FFD700'},3:{n:'Susah',t:12,b:3,bg:'rgba(255,107,53,.2)',tc:'#FF8C42'}};
+const BADGES={'Sifir Master':{d:'Skor penuh Bahagian 1',i:'🌟'},'Unit Champion':{d:'Skor penuh Bahagian 2',i:'📏'},'Problem Solver':{d:'Skor penuh Bahagian 3',i:'🧠'},'Perfect Score':{d:'Semua soalan betul!',i:'💯'},'Speed Genius':{d:'Purata masa < 5s',i:'⚡'},'Combo King':{d:'5 betul berturut-turut',i:'🔥'},'Survivor':{d:'Habis tanpa hilang nyawa',i:'❤️'},'Level Master':{d:'Capai Level 3',i:'🚀'},'Quick Thinker':{d:'Jawab dalam < 3s',i:'💨'}};
 
-// ===== FULL SCREEN BACKGROUND FUNCTION =====
-function setBg(img){
-  document.getElementById('fullscreen-bg').style.backgroundImage=`url('${img}')`;
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let ablyClient=null, roomChannel=null;
+let myName='', myId='', myEmoji='';
+let roomCode='', isHost=false, gameConfig={};
+let selSec_=1, selQN=10;
+let players={}; // { id: {name,emoji,skor,nyawa,combo,lv,bdg,done} }
+let G={nyawa:3,combo:0,lv:1,ws:0,skor:0,rekod:[],bdg:[],qi:0,ans:null,t0:0};
+let tid=null;
+
+// ═══════════════════════════════════════════════
+// ABLY SETUP
+// ═══════════════════════════════════════════════
+function loadKey(){return localStorage.getItem('ably-key')||'';}
+function saveKey(){
+  const k=document.getElementById('ably-key').value.trim();
+  if(!k||!k.includes(':')){document.getElementById('key-err').textContent='⚠️ Format tidak betul. Contoh: abc.def:GHiJkLmn';return;}
+  localStorage.setItem('ably-key',k);
+  initAbly(k, ()=>{ go('s-menu'); showToast('✅ Berjaya disambung ke Ably!'); });
 }
 
-const EMOJIS=['🦁','🐯','🐻','🦊','🐼','🐸','🦄','🐲','🦋','🐬','🦅','🐺','🦖','🐙','🦩','🐧','🐮','🐷','🐨','🦒','🦓','🦏','🦛','🐘','🦘','🦙','🐃','🦬','🐉','🦤'];
-const BTNS=['#FF6B6B','#4ECDC4','#45B7D1','#FFA07A'];
-const PBG=['#FFE4E1','#E1F5FE','#E8F5E9','#FFF9C4','#F3E8FF','#FFF0F6','#E0F7FA','#FFF8E1','#ECFDF5','#FEF9C3'];
-const PBD=['#FF6B6B','#4ECDC4','#66BB6A','#FFC107','#AB47BC','#F06292','#26C6DA','#FFA726','#10B981','#FBBF24'];
-const QN=10;
-const LV={1:{n:'Mudah',t:30,b:1,bg:'#90EE90'},2:{n:'Sederhana',t:20,b:2,bg:'#FFD700'},3:{n:'Susah',t:12,b:3,bg:'#FF6B6B'}};
-const BADGES={
-  'Sifir Master':{d:'Skor penuh Bahagian 1',i:'🌟'},'Unit Champion':{d:'Skor penuh Bahagian 2',i:'📏'},
-  'Problem Solver':{d:'Skor penuh Bahagian 3',i:'🧠'},'Perfect Score':{d:'Semua soalan betul!',i:'💯'},
-  'Speed Genius':{d:'Purata masa < 5 saat',i:'⚡'},'Combo King':{d:'5 betul berturut-turut',i:'🔥'},
-  'Survivor':{d:'Habis tanpa hilang nyawa',i:'❤️'},'Level Master':{d:'Capai Level 3',i:'🚀'},
-  'Quick Thinker':{d:'Jawab dalam < 3 saat',i:'💨'}
-};
-
-let G={},tid=null;
-function resetG(){G={mode:'solo',bah:1,exam:false,name:'',skor:0,nyawa:3,combo:0,lv:1,ws:0,rekod:[],bdg:[],qi:0,ans:null,t0:0,players:[],cp:0};}
-resetG();
-
-let mpE=[];
-function initMP(){mpE=[];document.getElementById('p-list').innerHTML='';_addRow();_addRow();}
-function _addRow(){
-  const i=mpE.length,em=EMOJIS[i%EMOJIS.length];
-  const d=document.createElement('div');d.className='p-row';
-  d.innerHTML=`<span class="p-emoji">${em}</span><input type="text" placeholder="Pemain ${i+1}..." style="margin:0;padding:6px 10px;flex:1">`;
-  document.getElementById('p-list').appendChild(d);
-  mpE.push(d.querySelector('input'));
-  document.getElementById('mp-count').textContent=mpE.length;
-}
-function addPlayer(){_addRow();}
-function removePlayer(){
-  if(mpE.length<=2){showToast('⚠️ Minimum 2 pemain!');return;}
-  mpE.pop();const l=document.getElementById('p-list');l.removeChild(l.lastChild);
-  document.getElementById('mp-count').textContent=mpE.length;
-}
-initMP();
-
-function go(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if(['s-menu','s-solo','s-multi','s-over','s-tamat','s-winner'].includes(id))setBg(FILES.mainBg);
-  if(id==='s-menu')stopMusic();
-}
-function emo(n){let s=0;for(let c of n)s+=c.charCodeAt(0);return EMOJIS[s%EMOJIS.length];}
-
-function startSolo(b){
-  const nm=document.getElementById('solo-name').value.trim();
-  if(!nm){showToast('⚠️ Sila masukkan nama!');return;}
-  resetG();G.mode='solo';G.name=nm;G.bah=b;
-  G.exam=document.getElementById('exam-solo').checked;
-  setBg(FILES.bg[b]);playMusic();
-  document.getElementById('live-panel').classList.remove('show');
-  go('s-game');nextQ();
-}
-
-function startMulti(b){
-  const names=mpE.map(e=>e.value.trim());
-  if(names.some(n=>!n)){showToast('⚠️ Sila isi semua nama!');return;}
-  if(new Set(names).size!==names.length){showToast('⚠️ Nama mesti berbeza!');return;}
-  resetG();G.mode='multi';G.bah=b;
-  G.exam=document.getElementById('exam-mp').checked;
-  G.players=names.map(n=>({name:n,emoji:emo(n),skor:0,nyawa:3,combo:0,lv:1,ws:0,rekod:[],bdg:[],over:false}));
-  G.cp=0;setBg(FILES.bg[b]);playMusic();showTurn();
-}
-
-function showTurn(){
-  const p=G.players[G.cp],bg=PBG[G.cp%PBG.length],bd=PBD[G.cp%PBD.length];
-  const minis=G.players.map((px,i)=>`<div class="mini-card" style="background:${PBG[i%PBG.length]};border-color:${PBD[i%PBD.length]}">${px.emoji} ${px.name.slice(0,7)}<br><b>${px.skor}</b> ${px.over?'💀':'❤'.repeat(px.nyawa)}</div>`).join('');
-  document.getElementById('turn-body').innerHTML=`<div style="background:${bg};padding:30px 20px;text-align:center;min-height:580px">
-    <span class="turn-emoji">${p.emoji}</span><div class="turn-name">${p.name}</div>
-    <div style="color:#64748B;font-size:12px;margin:4px 0 12px">Skor: <b>${p.skor}</b> | ${'❤️'.repeat(p.nyawa)}${'🖤'.repeat(3-p.nyawa)}</div>
-    <div class="mini-scores">${minis}</div>
-    <button class="btn" style="background:${bd};color:white;font-size:14px;padding:12px 24px;margin-top:14px" onclick="beginTurn()">▶ Mula Giliran ${p.emoji} ${p.name}</button>
-  </div>`;
-  go('s-turn');
-}
-function beginTurn(){
-  G.qi=0;go('s-game');
-  document.getElementById('live-panel').classList.add('show');
-  renderLive();nextQ();
-}
-
-function renderLive(){
-  if(G.mode!=='multi')return;
-  const sorted=[...G.players.map((p,i)=>({...p,_i:i}))].sort((a,b)=>b.skor-a.skor);
-  const M=['🥇','🥈','🥉'];
-  document.getElementById('live-body').innerHTML=sorted.map((p,r)=>{
-    const bg=PBG[p._i%PBG.length],bd=PBD[p._i%PBD.length],ic=p._i===G.cp;
-    const nw=p.over?'💀':'❤'.repeat(p.nyawa)+'🖤'.repeat(3-p.nyawa);
-    return `<div class="live-row ${ic?'cur':''}" style="background:${bg};border:2px solid ${ic?bd:'transparent'}">
-      <div class="lr-top"><span>${M[r]||r+1+'.'}</span><span>${p.emoji}</span>
-        <span style="max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
-        <span class="lr-skor">${p.skor}</span></div>
-      <div class="lr-bot" style="color:${bd}">${nw} ${p.bdg.map(b=>BADGES[b]?.i||'').join('')}</div>
-    </div>`;
-  }).join('');
-}
-
-function renderTopBar(){
-  const el=document.getElementById('g-topbar');
-  if(G.mode==='solo'){
-    el.innerHTML=`<span style="color:#FF6B9D;font-weight:800">${emo(G.name)} ${G.name}</span>
-      <div style="margin-left:auto;display:flex;gap:4px">
-        <button class="btn btn-grey btn-sm" onclick="openLB()">🏆</button>
-        <button class="btn btn-grey btn-sm" onclick="go('s-menu')">Menu</button></div>`;
-  }else{
-    const p=G.players[G.cp],bd=PBD[G.cp%PBD.length];
-    el.innerHTML=`<div style="background:${bd};color:white;padding:3px 10px;border-radius:8px;font-weight:800;font-size:12px">${p.emoji} ${p.name}</div>
-      <span style="font-size:10px;color:#64748B">giliran ${G.cp+1}/${G.players.length}</span>
-      <div style="margin-left:auto"><button class="btn btn-grey btn-sm" onclick="go('s-menu')">✕</button></div>`;
+function initAbly(key, onConnected){
+  if(ablyClient){ try{ablyClient.close();}catch(e){} }
+  try{
+    ablyClient = new Ably.Realtime({key, clientId:'client_'+Date.now()});
+    ablyClient.connection.on('connected',()=>{
+      setConnStatus(true);
+      if(onConnected) onConnected();
+    });
+    ablyClient.connection.on('disconnected',()=>setConnStatus(false));
+    ablyClient.connection.on('failed',()=>{
+      setConnStatus(false);
+      showToast('❌ API Key tidak sah. Semak semula!',4000);
+    });
+  }catch(e){
+    showToast('❌ Ralat Ably: '+e.message,4000);
   }
 }
 
-function updateUI(){
-  const ny=G.mode==='solo'?G.nyawa:G.players[G.cp].nyawa;
-  const co=G.mode==='solo'?G.combo:G.players[G.cp].combo;
-  const lv=G.mode==='solo'?G.lv:G.players[G.cp].lv;
-  const sk=G.mode==='solo'?G.skor:G.players[G.cp].skor;
-  document.getElementById('g-nyawa').textContent='❤️'.repeat(ny)+'🖤'.repeat(3-ny);
-  document.getElementById('g-combo').textContent=co===0?'🔥 —':co<3?`🔥 x${co}`:`🔥🔥 x${co}!`;
-  const lel=document.getElementById('g-lv');lel.textContent=`📈 L${lv} ${LV[lv].n}`;lel.style.background=LV[lv].bg;
-  document.getElementById('g-skor').textContent=`Skor: ${sk}`;
+function setConnStatus(on){
+  const dot=document.getElementById('conn-dot');
+  const txt=document.getElementById('conn-status');
+  if(dot) dot.classList.toggle('on',on);
+  if(txt) txt.textContent=on?'Bersambung ✓':'Terputus...';
 }
 
-function clv(){return G.mode==='solo'?G.lv:G.players[G.cp].lv;}
+// ═══════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════
+function go(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function showToast(msg,dur=2500){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),dur); }
+function emojiFor(n){ let s=0;for(let c of n)s+=c.charCodeAt(0);return EMOJIS[s%EMOJIS.length]; }
+function goSetup(){ go('s-setup'); }
+
+function selSec(n){
+  selSec_=n;
+  document.querySelectorAll('.sec-card').forEach((c,i)=>c.classList.toggle('selected',i+1===n));
+}
+selSec(1);
+
+function setQN(n){
+  selQN=n;
+  [5,10,15,20].forEach(v=>{ const el=document.getElementById(`qn-${v}`); if(el)el.style.border=v===n?'2px solid var(--gold)':'2px solid transparent'; });
+}
+
+function codeIn(i){ const el=document.getElementById(`cd${i}`); el.value=el.value.replace(/[^0-9]/g,'').slice(-1); if(el.value&&i<3)document.getElementById(`cd${i+1}`).focus(); }
+function codeBk(e,i){ if(e.key==='Backspace'&&!document.getElementById(`cd${i}`).value&&i>0)document.getElementById(`cd${i-1}`).focus(); }
+function getCode(){ return [0,1,2,3].map(i=>document.getElementById(`cd${i}`).value).join(''); }
+function showRoomCode(code){ document.getElementById('lobby-code').innerHTML=code.split('').map(d=>`<div class="rc-digit">${d}</div>`).join(''); }
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function goCreate(){
+  myName=document.getElementById('menu-name').value.trim();
+  if(!myName){showToast('⚠️ Masukkan nama dulu!');return;}
+  myEmoji=emojiFor(myName);
+  if(!ablyClient||ablyClient.connection.state!=='connected'){showToast('⚠️ Belum bersambung ke Ably!');return;}
+  go('s-create');
+}
+function goJoin(){
+  myName=document.getElementById('menu-name').value.trim();
+  if(!myName){showToast('⚠️ Masukkan nama dulu!');return;}
+  myEmoji=emojiFor(myName);
+  if(!ablyClient||ablyClient.connection.state!=='connected'){showToast('⚠️ Belum bersambung ke Ably!');return;}
+  [0,1,2,3].forEach(i=>{const el=document.getElementById(`cd${i}`);if(el)el.value='';});
+  document.getElementById('join-err').textContent='';
+  go('s-join');
+  setTimeout(()=>document.getElementById('cd0').focus(),200);
+}
+
+// ═══════════════════════════════════════════════
+// ROOM CHANNEL HELPERS
+// ═══════════════════════════════════════════════
+function channelName(code){ return `bijak-sifir-room-${code}`; }
+
+function subscribeRoom(code){
+  if(roomChannel){ try{roomChannel.unsubscribe();roomChannel.detach();}catch(e){} }
+  roomChannel = ablyClient.channels.get(channelName(code));
+
+  roomChannel.subscribe('player-join', msg=>{
+    const p=msg.data;
+    if(!players[p.id]) players[p.id]=p;
+    renderLobbyPlayers();
+  });
+  roomChannel.subscribe('player-leave', msg=>{
+    delete players[msg.data.id];
+    renderLobbyPlayers();
+    renderLiveRows();
+  });
+  roomChannel.subscribe('game-start', msg=>{
+    gameConfig=msg.data;
+    if(document.getElementById('s-lobby').classList.contains('active')){
+      beginGame();
+    }
+  });
+  roomChannel.subscribe('score-update', msg=>{
+    const p=msg.data;
+    if(players[p.id]) Object.assign(players[p.id],p);
+    renderLiveRows();
+    renderWaitRows();
+    checkAllDone();
+  });
+  roomChannel.subscribe('request-state', msg=>{
+    // Host re-sends current state to a late joiner
+    if(isHost){
+      publish('room-state',{players, config:gameConfig, roomCode});
+    }
+  });
+  roomChannel.subscribe('room-state', msg=>{
+    if(!isHost){
+      players=msg.data.players||{};
+      gameConfig=msg.data.config||{};
+      renderLobbyPlayers();
+    }
+  });
+}
+
+function publish(event, data){
+  if(roomChannel) roomChannel.publish(event, data);
+}
+
+// ═══════════════════════════════════════════════
+// CREATE ROOM
+// ═══════════════════════════════════════════════
+function createRoom(){
+  const code=Math.floor(1000+Math.random()*9000).toString();
+  roomCode=code; isHost=true;
+  myId='p_'+Date.now().toString(36);
+  gameConfig={section:selSec_,qn:selQN,exam:document.getElementById('exam-mode').checked};
+
+  players={};
+  players[myId]={id:myId,name:myName,emoji:myEmoji,skor:0,nyawa:3,combo:0,lv:1,bdg:[],done:false};
+
+  subscribeRoom(code);
+  showRoomCode(code);
+  renderLobbyPlayers();
+  renderLobbyConfig();
+
+  document.getElementById('host-btn-wrap').style.display='block';
+  document.getElementById('guest-wait').style.display='none';
+  go('s-lobby');
+  showToast(`🏠 Bilik ${code} bersedia!`);
+}
+
+// ═══════════════════════════════════════════════
+// JOIN ROOM
+// ═══════════════════════════════════════════════
+function joinRoom(){
+  const code=getCode();
+  if(code.length!==4){document.getElementById('join-err').textContent='⚠️ Masukkan 4 digit!';return;}
+  roomCode=code; isHost=false;
+  myId='p_'+Date.now().toString(36);
+  players={};
+  players[myId]={id:myId,name:myName,emoji:myEmoji,skor:0,nyawa:3,combo:0,lv:1,bdg:[],done:false};
+
+  subscribeRoom(code);
+  // Ask host for current state
+  setTimeout(()=>publish('request-state',{from:myId}),400);
+  // Announce join
+  setTimeout(()=>publish('player-join',players[myId]),600);
+
+  showRoomCode(code);
+  document.getElementById('host-btn-wrap').style.display='none';
+  document.getElementById('guest-wait').style.display='block';
+  go('s-lobby');
+  showToast(`✅ Masuk bilik ${code}!`);
+
+  // Listen for room state response
+  roomChannel.subscribe('room-state', msg=>{
+    players=msg.data.players||{};
+    players[myId]={id:myId,name:myName,emoji:myEmoji,skor:0,nyawa:3,combo:0,lv:1,bdg:[],done:false};
+    gameConfig=msg.data.config||{};
+    renderLobbyPlayers();
+    renderLobbyConfig();
+  });
+}
+
+// ═══════════════════════════════════════════════
+// LOBBY
+// ═══════════════════════════════════════════════
+function renderLobbyPlayers(){
+  const sorted=Object.values(players).sort((a,b)=>a.id<b.id?-1:1);
+  document.getElementById('lobby-players').innerHTML=sorted.map(p=>{
+    const me=p.id===myId, host=isHost&&p.id===myId;
+    return `<div class="player-row"><span class="p-emoji">${p.emoji}</span><span class="p-name">${p.name}</span>${host?'<span class="p-host">HOST</span>':''}${me?'<span class="p-you">SAYA</span>':''}</div>`;
+  }).join('');
+  const c=sorted.length;
+  document.getElementById('lobby-count').textContent=`(${c} pemain)`;
+  const sb=document.getElementById('start-btn');
+  if(sb) sb.textContent=c<2?`▶ Perlu min. 2 pemain (ada ${c})`:`▶ Mula Permainan (${c} pemain)`;
+}
+function renderLobbyConfig(){
+  const BN={1:'Bahagian 1 — Sifir',2:'Bahagian 2 — Tukar Unit',3:'Bahagian 3 — Masalah'};
+  document.getElementById('lobby-cfg').innerHTML=`📚 ${BN[gameConfig.section||1]}<br>❓ ${gameConfig.qn||10} Soalan<br>${gameConfig.exam?'📝 Mode Peperiksaan':'👁️ Mod Biasa'}`;
+}
+
+// ═══════════════════════════════════════════════
+// START GAME
+// ═══════════════════════════════════════════════
+function hostStart(){
+  const c=Object.keys(players).length;
+  if(c<2){showToast('⚠️ Perlu sekurang-kurangnya 2 pemain!');return;}
+  // Announce join for host too (so others have host in players list)
+  publish('player-join',players[myId]);
+  setTimeout(()=>publish('game-start',gameConfig),300);
+  setTimeout(()=>beginGame(),400);
+}
+
+function beginGame(){
+  G={nyawa:3,combo:0,lv:1,ws:0,skor:0,rekod:[],bdg:[],qi:0,ans:null,t0:0};
+  const BN={1:'Bahagian 1',2:'Bahagian 2',3:'Bahagian 3'};
+  const BC={1:'rgba(255,107,53,.2)',2:'rgba(0,78,137,.25)',3:'rgba(26,147,111,.2)'};
+  const BTC={1:'#FF8C42',2:'#4FC3F7',3:'#2ECC71'};
+  const b=document.getElementById('g-sec-badge');
+  b.textContent=BN[gameConfig.section]; b.style.background=BC[gameConfig.section]; b.style.color=BTC[gameConfig.section];
+  document.getElementById('g-room').textContent='#'+roomCode;
+  document.getElementById('g-players-count').textContent=Object.keys(players).length+' pemain';
+  go('s-game');
+  nextQ();
+}
+
+// ═══════════════════════════════════════════════
+// QUESTION GENERATORS
+// ═══════════════════════════════════════════════
 function ri(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function shuf(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+function genSifir(lv){let a,b;if(lv===1){a=ri(2,5);b=ri(2,5);}else if(lv===2){a=ri(2,9);b=ri(2,9);}else{a=ri(6,12);b=ri(6,12);}const ans=a*b;return{t:`${a} × ${b} = ?`,a:ans,c:shuf([ans,ans+ri(1,5),Math.max(1,ans-ri(1,5)),ans+ri(6,12)])};}
+function genUnit(lv){const pools={1:['kg_g','l_ml','jam_min'],2:['kg_g','g_kg','l_ml','ml_l','jam_min','min_jam'],3:['kg_g','g_kg','l_ml','ml_l','jam_min','min_jam','hari_jam','minggu_hari']};const j=pools[lv][Math.floor(Math.random()*pools[lv].length)];let t,ans;if(j==='kg_g'){const v=ri(1,20);t=`${v} kg = ? g`;ans=v*1000;}else if(j==='g_kg'){const v=[1000,2000,3000,5000,8000,10000][ri(0,5)];t=`${v} g = ? kg`;ans=v/1000;}else if(j==='l_ml'){const v=ri(1,20);t=`${v} L = ? mL`;ans=v*1000;}else if(j==='ml_l'){const v=[1000,2000,3000,4000,5000][ri(0,4)];t=`${v} mL = ? L`;ans=v/1000;}else if(j==='jam_min'){const v=ri(1,10);t=`${v} jam = ? minit`;ans=v*60;}else if(j==='min_jam'){const v=[60,120,180,240,300][ri(0,4)];t=`${v} minit = ? jam`;ans=v/60;}else if(j==='hari_jam'){const v=ri(1,7);t=`${v} hari = ? jam`;ans=v*24;}else{const v=ri(1,4);t=`${v} minggu = ? hari`;ans=v*7;}const cs=new Set([ans]);while(cs.size<4){const d=ans<10?ri(1,2):ans<100?ri(5,15):ri(10,100);const p2=ans+(Math.random()<.5?d:-d);if(p2>0)cs.add(p2);}return{t,a:ans,c:shuf([...cs])};}
+const MP={1:[{t:'Alia ada 2 gulung riben: 32cm dan 57cm. Jumlah dalam mm?',a:890,w:[880,900,89]},{t:'Kek dipotong 8 bahagian. Aina makan 3/8, adik 2/8. Baki?',a:3,w:[5,2,4]},{t:'Panjang bilik 4m. Lebar 3m. Perimeter bilik?',a:14,w:[12,7,16]}],2:[{t:'Mat ada kertas 76m. Adik potong 34m. Baki dalam cm?',a:4200,w:[42,420,4000]},{t:'Durian 0.5kg sebiji. Hanafi beli 6 biji. Jumlah dalam gram?',a:3000,w:[3,300,30000]},{t:'Rauf main bola 30 minit sehari. Jumlah seminggu dalam jam?',a:3.5,w:[3,4,210]}],3:[{t:'Sofia cuti 3 hari lalu 4 hari lagi. Jumlah dalam minggu?',a:1,w:[7,2,3]},{t:'Haziq bawa 2L air. Baki 500ml. Berapa liter diminum?',a:1.5,w:[1,2,0.5]},{t:'Bekalan 6000L. Guna 250L sehari. Tahan berapa hari?',a:24,w:[20,25,30]},{t:'Buku RM5.90. Haidhar beli 5 buah. Baki dari RM50?',a:20.5,w:[20,21,19.5]}]};
+function genMasalah(lv){const pool=MP[lv],s=pool[Math.floor(Math.random()*pool.length)];return{t:s.t,a:s.a,c:shuf([s.a,...s.w])};}
+function genQ(){const lv=G.lv,sec=gameConfig.section||1;return sec===1?genSifir(lv):sec===2?genUnit(lv):genMasalah(lv);}
 
-function genSifir(){
-  const lv=clv();let a,b;
-  if(lv===1){a=ri(2,5);b=ri(2,5);}else if(lv===2){a=ri(2,9);b=ri(2,9);}else{a=ri(6,12);b=ri(6,12);}
-  const ans=a*b;return{t:`${a} × ${b} = ?`,a:ans,c:shuf([ans,ans+ri(1,5),Math.max(1,ans-ri(1,5)),ans+ri(6,12)])};
-}
-function genUnit(){
-  const lv=clv();
-  const pools={1:['kg_g','l_ml','jam_min'],2:['kg_g','g_kg','l_ml','ml_l','jam_min','min_jam'],3:['kg_g','g_kg','l_ml','ml_l','jam_min','min_jam','hari_jam','minggu_hari']};
-  const j=pools[lv][Math.floor(Math.random()*pools[lv].length)];
-  let t,ans;
-  if(j==='kg_g'){const v=ri(1,20);t=`${v} kg = ? g`;ans=v*1000;}
-  else if(j==='g_kg'){const v=[1000,2000,3000,4000,5000,6000,8000,10000][ri(0,7)];t=`${v} g = ? kg`;ans=v/1000;}
-  else if(j==='l_ml'){const v=ri(1,20);t=`${v} L = ? mL`;ans=v*1000;}
-  else if(j==='ml_l'){const v=[1000,2000,3000,4000,5000,6000][ri(0,5)];t=`${v} mL = ? L`;ans=v/1000;}
-  else if(j==='jam_min'){const v=ri(1,10);t=`${v} jam = ? minit`;ans=v*60;}
-  else if(j==='min_jam'){const v=[60,120,180,240,300][ri(0,4)];t=`${v} minit = ? jam`;ans=v/60;}
-  else if(j==='hari_jam'){const v=ri(1,7);t=`${v} hari = ? jam`;ans=v*24;}
-  else{const v=ri(1,4);t=`${v} minggu = ? hari`;ans=v*7;}
-  const cs=new Set([ans]);
-  while(cs.size<4){const d=ans<10?ri(1,2):ans<100?ri(5,15):ri(10,100);const p2=ans+(Math.random()<.5?d:-d);if(p2>0)cs.add(p2);}
-  return{t,a:ans,c:shuf([...cs])};
-}
-const MP={
-  1:[{t:'Alia ada 2 gulung riben: 32cm dan 57cm. Jumlah dalam mm?',a:890,w:[880,900,89]},{t:'Kek dipotong 8 bahagian. Aina makan 3/8, adik 2/8. Baki?',a:3,w:[5,2,4]}],
-  2:[{t:'Mat ada kertas 76m. Adik potong 34m. Baki dalam cm?',a:4200,w:[42,420,4000]},{t:'Durian 0.5kg sebiji. Hanafi beli 6 biji. Jumlah dalam gram?',a:3000,w:[3,300,30000]},{t:'Rauf main bola 30 minit sehari. Jumlah seminggu dalam jam?',a:3.5,w:[3,4,210]}],
-  3:[{t:'Sofia cuti 3 hari lalu 4 hari lagi. Jumlah dalam minggu?',a:1,w:[7,2,3]},{t:'Haziq bawa 2L air. Baki 500ml. Berapa liter diminum?',a:1.5,w:[1,2,0.5]},{t:'Bekalan 6000L. Guna 250L sehari. Tahan berapa hari?',a:24,w:[20,25,30]},{t:'Buku RM5.90. Haidhar beli 5 buah. Baki dari RM50?',a:20.5,w:[20,21,19.5]}]
-};
-function genMasalah(){const lv=clv(),pool=MP[lv],s=pool[Math.floor(Math.random()*pool.length)];return{t:s.t,a:s.a,c:shuf([s.a,...s.w])};}
-function genQ(){return G.bah===1?genSifir():G.bah===2?genUnit():genMasalah();}
-
+// ═══════════════════════════════════════════════
+// GAME LOOP
+// ═══════════════════════════════════════════════
 function nextQ(){
-  G.qi++;if(G.qi>QN){G.mode==='multi'?endTurn():endSolo();return;}
-  renderTopBar();updateUI();if(G.mode==='multi')renderLive();
-  const q=genQ();G.ans=q.a;G.t0=Date.now();
-  const BN={1:'Sifir',2:'Tukar Unit',3:'Masalah Matematik'};
-  document.getElementById('g-sec').textContent=`Bahagian ${G.bah}: ${BN[G.bah]}`;
-  document.getElementById('g-qnum').textContent=`Soalan ${G.qi}/${QN}`;
+  G.qi++;
+  const qn=gameConfig.qn||10;
+  if(G.qi>qn){myDone(true);return;}
+  updateGameUI();
+  const q=genQ(); G.ans=q.a; G.t0=Date.now();
+  document.getElementById('g-qnum').textContent=`${G.qi}/${qn}`;
   document.getElementById('g-q').textContent=q.t;
   document.getElementById('g-msg').textContent='';
-  document.getElementById('g-msg').className='g-status';
-  document.getElementById('g-prog').style.width=`${(G.qi-1)/QN*100}%`;
-  const grid=document.getElementById('g-ans');grid.innerHTML='';
+  document.getElementById('g-msg').className='g-msg';
+  document.getElementById('g-prog').style.width=`${(G.qi-1)/qn*100}%`;
+  const grid=document.getElementById('g-ans'); grid.innerHTML='';
   q.c.forEach((c,i)=>{
-    const b=document.createElement('button');b.className='ans-btn';b.style.background=BTNS[i];b.textContent=c;
-    b.onclick=()=>onAns(c,b);grid.appendChild(b);
+    const b=document.createElement('button'); b.className='ans-btn'; b.style.background=ABTNS[i]; b.textContent=c;
+    b.onclick=()=>onAns(c); grid.appendChild(b);
   });
   startTimer();
 }
 
 function startTimer(){
-  clearInterval(tid);const lim=LV[clv()].t;
+  clearInterval(tid);const lim=LV[G.lv].t;
   tid=setInterval(()=>{
-    const el=document.getElementById('g-timer');if(!el){clearInterval(tid);return;}
+    const el=document.getElementById('g-timer'); if(!el){clearInterval(tid);return;}
     const e=(Date.now()-G.t0)/1000;
-    el.textContent=`⏱ ${e.toFixed(1)}s`;el.className=e>=lim-5?'timer warn':'timer';
-    if(e>=lim){clearInterval(tid);onAns(null,null,true);}
+    el.textContent=`⏱ ${e.toFixed(1)}s`; el.className=e>=lim-5?'timer warn':'timer';
+    if(e>=lim){clearInterval(tid);onAns(null,true);}
   },100);
 }
 
-function onAns(val,btn,tout=false){
-  clearInterval(tid);const e=(Date.now()-G.t0)/1000,ans=G.ans;
+function onAns(val,tout=false){
+  clearInterval(tid);
+  const e=(Date.now()-G.t0)/1000, ans=G.ans;
   const ok=!tout&&parseFloat(val)===parseFloat(ans);
   document.querySelectorAll('.ans-btn').forEach(b=>{
     b.disabled=true;
-    if(!G.exam)b.classList.add(parseFloat(b.textContent)===parseFloat(ans)?'correct':'wrong');
+    if(!gameConfig.exam) b.classList.add(parseFloat(b.textContent)===parseFloat(ans)?'correct':'wrong');
   });
-  if(ok)doOk(e);else doFail(ans,tout,e);
+  if(ok) doOk(e); else doFail(ans,tout,e);
 }
 
 function doOk(e){
-  playSfx(sfxOk);let bonus=0;
-  if(G.mode==='solo'){
-    G.combo++;G.ws=0;bonus=G.combo>=3?LV[G.lv].b:0;G.skor+=1+bonus;
-    if(G.combo>=5&&!G.bdg.includes('Combo King'))G.bdg.push('Combo King');
-    if(e<3&&!G.bdg.includes('Quick Thinker'))G.bdg.push('Quick Thinker');
-    if(G.combo%4===0&&G.lv<3){G.lv++;showToast(`⬆️ Level Naik! L${G.lv}`);}
-    G.rekod.push({ok:true,t:e});
-  }else{
-    const p=G.players[G.cp];p.combo++;p.ws=0;bonus=p.combo>=3?LV[p.lv].b:0;p.skor+=1+bonus;
-    if(p.combo>=5&&!p.bdg.includes('Combo King'))p.bdg.push('Combo King');
-    if(e<3&&!p.bdg.includes('Quick Thinker'))p.bdg.push('Quick Thinker');
-    if(p.combo%4===0&&p.lv<3){p.lv++;showToast(`⬆️ ${p.emoji} L${p.lv}`);}
-    p.rekod.push({ok:true,t:e});
-  }
-  if(!G.exam){const co=G.mode==='solo'?G.combo:G.players[G.cp].combo;const m=document.getElementById('g-msg');m.textContent=`✔ Betul! +${1+bonus}${co>=3?` 🔥x${co}`:''}`;m.className='g-status ok';}
-  updateUI();if(G.mode==='multi')renderLive();setTimeout(nextQ,1400);
+  G.combo++; G.ws=0;
+  const bonus=G.combo>=3?LV[G.lv].b:0; G.skor+=1+bonus;
+  if(G.combo>=5&&!G.bdg.includes('Combo King'))G.bdg.push('Combo King');
+  if(e<3&&!G.bdg.includes('Quick Thinker'))G.bdg.push('Quick Thinker');
+  if(G.combo%4===0&&G.lv<3){G.lv++;showToast(`⬆️ Level Naik! L${G.lv}`);}
+  G.rekod.push({ok:true,t:e});
+  if(!gameConfig.exam){const m=document.getElementById('g-msg');m.textContent=`✔ Betul! +${1+bonus}${G.combo>=3?` 🔥x${G.combo}`:''}`;m.className='g-msg ok';}
+  pushScore(); updateGameUI(); setTimeout(nextQ,1300);
 }
-
 function doFail(ans,tout,e){
-  playSfx(sfxWrong);let ny;
-  if(G.mode==='solo'){
-    G.combo=0;G.ws++;G.nyawa--;ny=G.nyawa;
-    if(G.ws>=3&&G.lv>1){G.lv--;G.ws=0;showToast(`⬇️ Level Turun L${G.lv}`);}
-    G.rekod.push({ok:false,t:e});
-  }else{
-    const p=G.players[G.cp];p.combo=0;p.ws++;p.nyawa--;ny=p.nyawa;
-    if(p.ws>=3&&p.lv>1){p.lv--;p.ws=0;showToast(`⬇️ ${p.emoji} Level Turun`);}
-    p.rekod.push({ok:false,t:e});
+  G.combo=0; G.ws++; G.nyawa--;
+  if(G.ws>=3&&G.lv>1){G.lv--;G.ws=0;showToast(`⬇️ Level Turun L${G.lv}`);}
+  G.rekod.push({ok:false,t:e});
+  if(!gameConfig.exam){const m=document.getElementById('g-msg');m.textContent=(tout?'⏰ Masa Habis!':`❌ Salah! (Betul: ${ans})`)+` ${'❤️'.repeat(G.nyawa)}${'🖤'.repeat(3-G.nyawa)}`;m.className='g-msg fail';}
+  pushScore(); updateGameUI();
+  if(G.nyawa<=0) setTimeout(()=>myDone(false),1300);
+  else setTimeout(nextQ,1300);
+}
+
+function updateGameUI(){
+  document.getElementById('g-nyawa').textContent='❤️'.repeat(G.nyawa)+'🖤'.repeat(3-G.nyawa);
+  document.getElementById('g-combo').textContent=G.combo===0?'🔥 —':G.combo<3?`🔥 x${G.combo}`:`🔥🔥 x${G.combo}!`;
+  const lel=document.getElementById('g-lv'); lel.textContent=`L${G.lv}`; lel.style.background=LV[G.lv].bg; lel.style.color=LV[G.lv].tc;
+  document.getElementById('g-skor').textContent=`${G.skor} pts`;
+}
+
+function pushScore(){
+  if(players[myId]) Object.assign(players[myId],{skor:G.skor,nyawa:G.nyawa,combo:G.combo,lv:G.lv,bdg:G.bdg});
+  publish('score-update',{id:myId,skor:G.skor,nyawa:G.nyawa,combo:G.combo,lv:G.lv,bdg:G.bdg,done:false});
+  renderLiveRows();
+}
+
+// ═══════════════════════════════════════════════
+// MY GAME DONE
+// ═══════════════════════════════════════════════
+function myDone(completed){
+  clearInterval(tid);
+  awardBadges(completed);
+  if(players[myId]) Object.assign(players[myId],{skor:G.skor,nyawa:G.nyawa,lv:G.lv,bdg:G.bdg,done:true});
+  publish('score-update',{id:myId,skor:G.skor,nyawa:G.nyawa,combo:G.combo,lv:G.lv,bdg:G.bdg,done:true});
+  checkAllDone();
+  if(!checkAllDone()){
+    document.getElementById('wait-emoji').textContent=completed?'🎉':'💔';
+    document.getElementById('wait-title').textContent=completed?`Syabas! Skor: ${G.skor} pts`:`Nyawa Habis! Skor: ${G.skor} pts`;
+    const rem=Object.values(players).filter(p=>!p.done).length;
+    document.getElementById('wait-sub').textContent=`Menunggu ${rem} pemain lagi...`;
+    renderWaitRows();
+    go('s-wait');
   }
-  if(!G.exam){const m=document.getElementById('g-msg');m.textContent=(tout?'⏰ Masa Habis!':` ❌ Salah! (Betul: ${ans})`)+` ${'❤️'.repeat(ny)}${'🖤'.repeat(3-ny)}`;m.className='g-status fail';}
-  updateUI();if(G.mode==='multi')renderLive();
-  if(ny<=0){if(G.mode==='multi')G.players[G.cp].over=true;setTimeout(()=>G.mode==='multi'?endTurn():gameOver(),1400);}
-  else setTimeout(nextQ,1400);
 }
 
-function gameOver(){
-  clearInterval(tid);stopMusic();saveLB();
-  document.getElementById('over-body').innerHTML=`<p style="font-size:16px;font-weight:800;color:#FF6B9D">${emo(G.name)} ${G.name}</p><p style="font-size:28px;font-weight:800;color:#00C9A7">Skor: ${G.skor}</p><p style="color:#EF4444;font-size:12px">Nyawa habis!</p>${bdgHtml(G.bdg)}<div class="row mt6"><button class="btn btn-pink" onclick="go('s-menu')">🔄 Cuba Lagi</button><button class="btn btn-purple" onclick="openLB()">🏆 Leaderboard</button></div>`;
-  go('s-over');
+function checkAllDone(){
+  const all=Object.values(players);
+  if(all.length<1) return false;
+  const done=all.every(p=>p.done);
+  if(done){
+    setTimeout(showResults,800);
+    return true;
+  }
+  return false;
 }
 
-function endSolo(){
-  clearInterval(tid);stopMusic();awardBdgSolo();saveLB();
-  const avg=G.rekod.length?(G.rekod.reduce((a,r)=>a+r.t,0)/G.rekod.length).toFixed(1):'—';
-  document.getElementById('tamat-body').innerHTML=`<p style="font-size:15px;font-weight:800;color:#FF6B9D">${emo(G.name)} ${G.name}</p><p style="font-size:30px;font-weight:800;color:#00C9A7">${G.skor} / ${QN}</p><p style="font-size:12px;color:#EF4444">Nyawa: ${'❤️'.repeat(G.nyawa)}${'🖤'.repeat(3-G.nyawa)}</p><p style="font-size:12px;color:#0EA5E9">⏱ Purata: ${avg}s</p><p style="font-size:12px;font-weight:800;color:#1E3A5F">📈 Level: ${G.lv} (${LV[G.lv].n})</p>${bdgHtml(G.bdg)}<div class="row mt6"><button class="btn btn-teal" onclick="go('s-menu')">🏠 Menu</button><button class="btn btn-purple" onclick="openLB()">🏆 Leaderboard</button></div>`;
-  go('s-tamat');
-}
-
-function awardBdgSolo(){
-  const b=G.bdg;
-  if(G.skor===QN){if(G.bah===1&&!b.includes('Sifir Master'))b.push('Sifir Master');if(G.bah===2&&!b.includes('Unit Champion'))b.push('Unit Champion');if(G.bah===3&&!b.includes('Problem Solver'))b.push('Problem Solver');if(!b.includes('Perfect Score'))b.push('Perfect Score');}
+function awardBadges(completed){
+  const b=G.bdg,qn=gameConfig.qn||10;
+  if(G.skor>=qn){
+    if(gameConfig.section===1&&!b.includes('Sifir Master'))b.push('Sifir Master');
+    if(gameConfig.section===2&&!b.includes('Unit Champion'))b.push('Unit Champion');
+    if(gameConfig.section===3&&!b.includes('Problem Solver'))b.push('Problem Solver');
+    if(!b.includes('Perfect Score'))b.push('Perfect Score');
+  }
   if(G.rekod.length){const avg=G.rekod.reduce((a,r)=>a+r.t,0)/G.rekod.length;if(avg<5&&!b.includes('Speed Genius'))b.push('Speed Genius');}
-  if(G.nyawa===3&&!b.includes('Survivor'))b.push('Survivor');
+  if(G.nyawa===3&&completed&&!b.includes('Survivor'))b.push('Survivor');
   if(G.lv===3&&!b.includes('Level Master'))b.push('Level Master');
 }
 
-function endTurn(){
-  clearInterval(tid);const p=G.players[G.cp];
-  if(p.skor===QN&&!p.bdg.includes('Perfect Score'))p.bdg.push('Perfect Score');
-  if(p.nyawa===3&&!p.bdg.includes('Survivor'))p.bdg.push('Survivor');
-  if(p.lv===3&&!p.bdg.includes('Level Master'))p.bdg.push('Level Master');
-  if(p.rekod.length){const avg=p.rekod.reduce((a,r)=>a+r.t,0)/p.rekod.length;if(avg<5&&!p.bdg.includes('Speed Genius'))p.bdg.push('Speed Genius');}
-  if(G.bah===1&&p.skor===QN&&!p.bdg.includes('Sifir Master'))p.bdg.push('Sifir Master');
-  if(G.bah===2&&p.skor===QN&&!p.bdg.includes('Unit Champion'))p.bdg.push('Unit Champion');
-  if(G.bah===3&&p.skor===QN&&!p.bdg.includes('Problem Solver'))p.bdg.push('Problem Solver');
-  G.cp++;if(G.cp>=G.players.length){saveLB();showWinner();}else showTurn();
+// ═══════════════════════════════════════════════
+// LIVE BOARD
+// ═══════════════════════════════════════════════
+const MEDALS=['🥇','🥈','🥉'];
+function sortedPlayers(){ return Object.values(players).sort((a,b)=>b.skor-a.skor); }
+function renderLiveRows(){
+  const sorted=sortedPlayers();
+  document.getElementById('live-rows').innerHTML=sorted.map((p,r)=>{
+    const me=p.id===myId;
+    const ny=p.done?'✅':('❤️'.repeat(p.nyawa)+'🖤'.repeat(3-p.nyawa));
+    return `<div class="live-row ${me?'me':''}"><span class="lr-rank">${MEDALS[r]||r+1+'.'}</span><span style="font-size:15px">${p.emoji}</span><span class="lr-name">${p.name}${me?' (saya)':''}</span><span class="lr-pts">${p.skor}pts</span><span class="lr-ny">${ny}</span></div>`;
+  }).join('');
+}
+function renderWaitRows(){
+  const sorted=sortedPlayers();
+  document.getElementById('wait-rows').innerHTML=sorted.map((p,r)=>{
+    const me=p.id===myId;
+    const st=p.done?'<span style="color:#2ECC71;font-size:10px;font-weight:800">✅ Selesai</span>':'<span style="color:#F59E0B;font-size:10px">🎮 Main...</span>';
+    return `<div class="live-row ${me?'me':''}"><span class="lr-rank">${MEDALS[r]||r+1+'.'}</span><span style="font-size:15px">${p.emoji}</span><span class="lr-name">${p.name}${me?' (saya)':''}</span><span class="lr-pts">${p.skor}pts</span>${st}</div>`;
+  }).join('');
 }
 
-function showWinner(){
-  stopMusic();
-  const sorted=[...G.players.map((p,i)=>({...p,_i:i}))].sort((a,b)=>b.skor-a.skor);
-  const win=sorted[0],winBd=PBD[win._i%PBD.length],M=['🥇','🥈','🥉'];
-  const rows=sorted.map((p,r)=>{const bg=PBG[p._i%PBG.length],bd=PBD[p._i%PBD.length];return `<div class="rank-row" style="background:${bg}"><span>${M[r]||r+1+'.'}</span><span style="font-size:18px">${p.emoji}</span><span class="rk-name">${p.name}</span><span class="rk-pts">${p.skor}pts</span><span>${'❤️'.repeat(p.nyawa)}${'🖤'.repeat(3-p.nyawa)}</span><span>${p.bdg.map(b=>BADGES[b]?.i||'').join('')}</span></div>`;}).join('');
-  const tie=sorted.length>1&&sorted[0].skor===sorted[1].skor;
-  document.getElementById('win-body').innerHTML=`<div style="background:${winBd}22;border:3px solid ${winBd};border-radius:16px;padding:14px;text-align:center;margin-bottom:10px"><div style="font-size:56px">${win.emoji}</div><div style="font-size:13px;font-weight:800;color:#F59E0B">🥇 PEMENANG!</div><div style="font-family:'Fredoka One',cursive;font-size:22px;color:#1E3A5F">${win.name}</div><div style="color:#00C9A7;font-weight:800">${win.skor} / ${QN} pts</div></div><div style="border-radius:12px;overflow:hidden">${rows}</div>${tie?'<p style="text-align:center;font-weight:800;color:#F59E0B;margin:6px">🤝 Seri!</p>':''}<div class="row mt6"><button class="btn btn-green" onclick="go('s-menu')">🔄 Main Lagi</button><button class="btn btn-purple" onclick="openLB()">🏆 Leaderboard</button></div>`;
-  go('s-winner');
+// ═══════════════════════════════════════════════
+// RESULTS
+// ═══════════════════════════════════════════════
+function showResults(){
+  const sorted=sortedPlayers();
+  const top=sorted.slice(0,3);
+  // Podium: [2nd, 1st, 3rd]
+  const order=top.length>=2?[top[1],top[0],top[2]].filter(Boolean):[top[0]];
+  const cls=['p2','p1','p3'];
+  document.getElementById('res-podium').innerHTML=order.map((p,i)=>{
+    const c=top.length===1?'p1':cls[i];
+    return `<div class="pod ${c}"><div class="pod-emoji">${p.emoji}</div><div class="pod-name">${p.name}</div><div class="pod-pts">${p.skor}pts</div></div>`;
+  }).join('');
+  document.getElementById('res-rows').innerHTML=sorted.map((p,r)=>{
+    const me=p.id===myId;
+    return `<div class="res-row ${me?'me':''}"><span style="font-family:'Fredoka One',cursive;font-size:15px;min-width:24px">${MEDALS[r]||r+1+'.'}</span><span style="font-size:17px">${p.emoji}</span><span style="flex:1;font-weight:700;font-size:13px">${p.name}${me?' ← kamu':''}</span><span style="color:var(--gold);font-weight:800">${p.skor}pts</span><span>${'❤️'.repeat(p.nyawa||0)}</span><span style="font-size:13px">${(p.bdg||[]).map(b=>BADGES[b]?.i||'').join('')}</span></div>`;
+  }).join('');
+  const myBdg=G.bdg;
+  document.getElementById('res-badges').innerHTML=myBdg.length?`<div class="badge-box"><div class="badge-title">🏆 Badge Anda</div>${myBdg.map(b=>{const i=BADGES[b]||{i:'🏅',d:b};return `<div class="badge-item"><span>${i.i}</span><span><b>${b}</b> — ${i.d}</span></div>`;}).join('')}</div>`:'';
+  go('s-result');
 }
 
-function bdgHtml(bdg){
-  if(!bdg||!bdg.length)return '<p style="font-size:11px;color:#94A3B8;margin:5px 0">(Tiada badge)</p>';
-  return `<div class="badge-box"><div class="badge-ttl">🏆 Badge Diperoleh:</div>${bdg.map(b=>{const i=BADGES[b]||{i:'🏅',d:b};return `<div class="badge-item"><span>${i.i}</span><span><b>${b}</b> — ${i.d}</span></div>`;}).join('')}</div>`;
+// ═══════════════════════════════════════════════
+// LEAVE / BACK
+// ═══════════════════════════════════════════════
+function leaveRoom(){
+  clearInterval(tid);
+  publish('player-leave',{id:myId});
+  if(roomChannel){try{roomChannel.unsubscribe();roomChannel.detach();}catch(e){}}
+  roomCode=''; isHost=false; players={};
+  go('s-menu');
+}
+function backMenu(){
+  clearInterval(tid);
+  publish('player-leave',{id:myId});
+  if(roomChannel){try{roomChannel.unsubscribe();roomChannel.detach();}catch(e){}}
+  roomCode=''; isHost=false; players={};
+  go('s-menu');
+}
+function playAgain(){
+  clearInterval(tid);
+  publish('player-leave',{id:myId});
+  if(roomChannel){try{roomChannel.unsubscribe();roomChannel.detach();}catch(e){}}
+  roomCode=''; players={};
+  go(isHost?'s-create':'s-join');
 }
 
-function saveLB(){
-  let lb=JSON.parse(localStorage.getItem('bijak-lb')||'[]');
-  if(G.mode==='solo')lb.push({n:G.name,s:G.skor,b:G.bah,bdg:G.bdg});
-  else G.players.forEach(p=>lb.push({n:p.emoji+p.name,s:p.skor,b:G.bah,bdg:p.bdg}));
-  lb.sort((a,b2)=>b2.s-a.s);localStorage.setItem('bijak-lb',JSON.stringify(lb.slice(0,50)));
-}
-function openLB(){
-  const lb=JSON.parse(localStorage.getItem('bijak-lb')||'[]'),M=['🥇','🥈','🥉'];
-  document.getElementById('lb-body').innerHTML=lb.length?lb.slice(0,10).map((e,i)=>`<div class="lb-row">${M[i]||i+1+'.'} <span class="lb-name">${e.n}</span><span class="lb-pts">${e.s}pts</span><span style="font-size:10px;color:#94A3B8">Bhg${e.b}</span><span>${(e.bdg||[]).map(b=>BADGES[b]?.i||'').join('')}</span></div>`).join(''):'<p style="text-align:center;color:#94A3B8">Tiada rekod lagi.</p>';
-  document.getElementById('m-lb').classList.add('on');
-}
-function openBadges(){
-  document.getElementById('bdg-body').innerHTML=Object.entries(BADGES).map(([n,i])=>`<div style="margin:7px 0"><div style="font-weight:800;font-size:13px">${i.i} ${n}</div><div style="font-size:11px;color:#64748B">${i.d}</div></div><hr>`).join('');
-  document.getElementById('m-bdg').classList.add('on');
-}
-function closeM(id){document.getElementById(id).classList.remove('on');}
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-
-// Set initial background on load
-setBg(FILES.mainBg);
+// ═══════════════════════════════════════════════
+// INIT ON LOAD
+// ═══════════════════════════════════════════════
+window.addEventListener('load',()=>{
+  const key=loadKey();
+  if(key){
+    document.getElementById('ably-key').value=key;
+    initAbly(key,()=>{
+      go('s-menu');
+      showToast('✅ Disambung semula ke Ably!');
+    });
+    // Still show menu even before connected (will show disconnected status)
+    setTimeout(()=>{
+      if(document.getElementById('s-setup').classList.contains('active'))
+        go('s-menu');
+    },3000);
+  }
+});
 </script>
 </body>
 </html>
