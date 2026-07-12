@@ -693,7 +693,7 @@ function janasoalan(){return soalanQueue[soalanKeGlobal-1]||soalanQueue[0];}
 function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function randChoice(arr){return arr[Math.floor(Math.random()*arr.length)];}
 function shuffle(arr){for(let i=arr.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}}
-function getNyawaTeks(n){return"❤️".repeat(n)+"🖤".repeat(3-n);}
+function getNyawaTeks(n){return"❤️".repeat(n)+"🖤".repeat(10-n);}
 function getComboTeks(c){return c===0?"🔥 Combo: —":(c<3?`🔥 Combo: x${c}`:`🔥🔥 Combo: x${c}!`);}
 function getBahagianName(b){return{1:"Sifir",2:"Penukaran Unit",3:"Penyelesaian Masalah"}[b];}
 
