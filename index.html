@@ -3,1022 +3,556 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sifir X ✨</title>
+<title>Permainan Bijak Sifir</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-    width: 100%;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-}
-
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-    font-family: Arial, sans-serif;
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 10px;
 }
-
 #app {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    display: flex;
-    flex-direction: column;
+  border-radius: 24px; width: 580px; min-height: 580px;
+  box-shadow: 0 25px 60px rgba(0,0,0,.35); overflow: hidden;
+  position: relative; background: white;
 }
-
-#bg-layer {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+#app-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background-size: cover; background-position: center; border-radius: 24px;
 }
-#bg-layer.bg-main {
-    background-image: url("main background.jpg");
+#app-bg::after {
+  content:''; position:absolute; inset:0; background:rgba(255,255,255,0.87); border-radius:24px;
 }
-
-#bg-layer.bg-b1 {
-    background-image: url("first background.jpg");
-}
-
-#bg-layer.bg-b2 {
-    background-image: url("second background.jpg");
-}
-
-#bg-layer.bg-b3 {
-    background-image: url("Escuela.jpg");
-}
-
-/* semi-transparent overlay so content is readable */
-#bg-tint {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255,255,255,0.38);
-    z-index: 1;
-}
-
-/* all screens sit above bg */
-.screen {
-    position: relative;
-    z-index: 2;
-    padding: 14px;
-    display: none;
-    flex-direction: column;
-    flex: 1;
-}
-
-.screen.active {
-    display: flex;
-}
-  /* semi-transparent overlay so content is readable */
-  #bg-tint {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255,255,255,0.38);
-    z-index: 1;
-  }
-
-  /* all screens sit above bg */
-  .screen {
-    position: relative;
-    z-index: 2;
-    padding: 14px;
-    display: none;
-    flex-direction: column;
-    flex: 1;
-  }
-  .screen.active { display: flex; }
-
-  /* ── TYPOGRAPHY ── */
-  h1 { font-size: 22px; font-weight: bold; color: #1a1a2e; text-align: center; text-shadow: 0 1px 4px rgba(255,255,255,0.9); }
-  h2 { font-size: 16px; font-weight: bold; color: #1a1a2e; text-align: center; margin-bottom: 8px; text-shadow: 0 1px 4px rgba(255,255,255,0.9); }
-
-  /* ── GLASS CARD ── */
-  .card {
-    background: rgba(255,255,255,0.78);
-    border-radius: 12px;
-    padding: 10px 14px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-    margin-bottom: 8px;
-    backdrop-filter: blur(6px);
-  }
-
-  /* ── BUTTONS ── */
-  .btn {
-    border: none; border-radius: 8px; padding: 10px 16px;
-    font-size: 13px; font-weight: bold; cursor: pointer;
-    transition: transform 0.1s, opacity 0.1s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
-  }
-  .btn:hover { transform: translateY(-1px); opacity: 0.92; }
-  .btn:active { transform: translateY(0); }
-
-  .tab-row { display: flex; gap: 8px; justify-content: center; margin: 8px 0; }
-  .tab-btn { flex:1; max-width:150px; }
-
-  .bahagian-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin: 8px 0; }
-  .bah-btn {
-    padding: 12px 8px; font-size: 11px; font-weight: bold;
-    border: none; border-radius: 10px; cursor: pointer;
-    line-height: 1.4; transition: transform 0.1s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
-  }
-  .bah-btn:hover { transform: scale(1.04); }
-
-  .info-box {
-    background: rgba(255,249,230,0.88); border: 1.5px solid #e5d58a;
-    border-radius: 8px; padding: 6px 10px; font-size: 11px;
-    text-align: center; margin: 4px 0; color: #555;
-  }
-
-  /* ── TOP BAR ── */
-  .top-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    background: rgba(255,255,255,0.80); padding: 6px 10px;
-    border-radius: 8px; margin-bottom: 6px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  }
-  .top-bar-left { font-size: 11px; color: #FF6B9D; font-weight: bold; }
-  .top-bar-right { display: flex; gap: 4px; }
-  .mini-btn {
-    font-size: 10px; padding: 3px 8px; border-radius: 5px;
-    border: none; cursor: pointer; font-weight: bold;
-  }
-
-  /* ── STATUS BAR ── */
-  .status-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 5px 10px; border-radius: 8px; margin-bottom: 6px;
-    font-size: 11px; background: rgba(255,255,255,0.78);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  }
-  .nyawa-txt { color: #EF4444; font-size: 13px; }
-  .combo-txt { color: #F59E0B; }
-  .level-badge { padding: 2px 8px; border-radius: 12px; font-weight: bold; font-size: 10px; color: #1E3A5F; }
-
-  /* ── QUESTION ── */
-  .section-label { text-align: center; font-size: 11px; font-weight: bold; color: #7C3AED; margin: 2px 0; }
-  .question-num  { text-align: center; font-size: 11px; color: #F97316; margin: 2px 0; font-weight: bold; }
-  .question-text {
-    text-align: center; font-size: 14px; font-weight: bold; color: #1E3A5F;
-    min-height: 64px; display: flex; align-items: center; justify-content: center;
-    padding: 10px; line-height: 1.5;
-    background: rgba(255,255,255,0.88);
-    border-radius: 10px; margin: 4px 0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  }
-
-  /* ── ANSWER BUTTONS ── */
-  .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
-  .answer-btn {
-    padding: 14px 8px; font-size: 13px; font-weight: bold; color: white;
-    border: none; border-radius: 10px; cursor: pointer;
-    transition: transform 0.1s; line-height: 1.2;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.22);
-  }
-  .answer-btn:hover { transform: scale(1.04); }
-  .answer-btn:disabled { cursor: not-allowed; opacity: 0.7; }
-
-  /* ── FOOTER ── */
-  .footer-row {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-top: 6px; padding: 5px 8px;
-    background: rgba(255,255,255,0.75);
-    border-radius: 8px;
-  }
-  .timer-txt { color: #0EA5E9; font-weight: bold; font-size: 13px; }
-  .timer-txt.warn { color: #EF4444; }
-  .status-txt { font-size: 11px; text-align: center; flex:1; padding: 0 6px; min-height: 20px; }
-  .status-ok    { color: #16A34A; font-weight: bold; }
-  .status-salah { color: #DC2626; font-weight: bold; }
-  .score-txt { color: #00C9A7; font-weight: bold; font-size: 13px; }
-
-  /* ── PROGRESS ── */
-  .progress-bar-wrap { background: rgba(229,231,235,0.7); border-radius: 8px; height: 8px; margin: 4px 0; overflow: hidden; }
-  .progress-bar { height: 100%; border-radius: 8px; background: linear-gradient(90deg,#7C3AED,#A78BFA); transition: width 0.3s; }
-
-  /* ── MULTIPLAYER ── */
-  .mp-content { display: flex; gap: 8px; flex: 1; }
-  .mp-left    { flex: 1; display: flex; flex-direction: column; }
-  .mp-right   {
-    width: 138px; background: rgba(240,244,255,0.85); border-radius: 10px;
-    border: 1.5px solid #A78BFA; overflow: hidden; flex-shrink: 0;
-  }
-  .live-header { background: #7C3AED; color: white; text-align: center; padding: 5px; font-size: 11px; font-weight: bold; }
-  .live-body   { padding: 6px; }
-  .live-row    { border-radius: 6px; padding: 4px 6px; margin-bottom: 4px; border: 1.5px solid transparent; }
-  .live-row.current { border-color: #7C3AED; }
-  .live-name   { font-size: 10px; font-weight: bold; }
-  .live-score  { font-size: 9px; margin-top: 1px; }
-
-  /* ── GILIRAN ── */
-  .giliran-wrap {
-    display: flex; align-items: center; justify-content: center;
-    flex: 1; padding: 10px;
-  }
-  .giliran-card {
-    background: rgba(255,255,255,0.88); border-radius: 14px; padding: 24px;
-    text-align: center; width: 100%;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.18);
-    border: 3px solid transparent;
-  }
-  .giliran-emoji  { font-size: 64px; margin-bottom: 8px; }
-  .giliran-name   { font-size: 20px; font-weight: bold; color: #000; margin-bottom: 4px; }
-  .giliran-info   { font-size: 12px; color: #64748B; margin-bottom: 10px; }
-  .giliran-scores { font-size: 10px; color: #333; margin-bottom: 14px; }
-
-  /* ── RESULTS ── */
-  .result-card {
-    background: rgba(243,232,255,0.88); border: 2px solid #A78BFA;
-    border-radius: 10px; padding: 10px 14px; margin: 6px 0;
-  }
-  .winner-card {
-    background: rgba(255,255,255,0.88); border-radius: 12px;
-    padding: 12px 16px; margin: 6px 0; text-align: center;
-    border: 3px solid #7C3AED;
-  }
-  .rank-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 6px 10px; border-radius: 8px; margin-bottom: 4px; font-size: 11px;
-  }
-
-  /* ── BADGES ── */
-  .badge-list { display: flex; flex-direction: column; gap: 4px; }
-  .badge-item { display: flex; gap: 8px; align-items: flex-start; }
-  .badge-icon { font-size: 18px; flex-shrink: 0; }
-  .badge-info { font-size: 11px; }
-  .badge-name { font-weight: bold; color: #7C3AED; }
-  .badge-desc { color: #64748B; }
-
-  /* ── LEADERBOARD ── */
-  .lb-row {
-    display: flex; align-items: center; gap: 8px;
-    padding: 6px 10px; border-radius: 8px; margin-bottom: 4px;
-    background: #f9f9f9; font-size: 11px;
-  }
-
-  /* ── FORMS ── */
-  label { font-size: 12px; color: #333; font-weight: bold; }
-  input[type="text"] {
-    width: 100%; padding: 8px 10px; border: 1.5px solid #ccc;
-    border-radius: 8px; font-size: 13px; margin: 4px 0;
-    outline: none; background: rgba(255,255,255,0.9);
-  }
-  input[type="text"]:focus { border-color: #A78BFA; }
-  .checkbox-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 12px; cursor: pointer; }
-  input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
-
-  .player-entry-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid #eee; }
-  .player-label { font-size: 12px; color: #555; width: 90px; flex-shrink: 0; }
-  .player-entry-row input { flex: 1; }
-  .scroll-area { max-height: 130px; overflow-y: auto; border: 1.5px solid #ddd; border-radius: 8px; padding: 6px; background: rgba(240,255,244,0.85); }
-
-  .count-row { display: flex; align-items: center; gap: 8px; justify-content: center; margin: 6px 0; }
-  .count-badge { background: #E0F2FE; font-weight: bold; font-size: 15px; padding: 2px 12px; border-radius: 8px; }
-
-  /* ── MODAL ── */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 100;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-overlay.active {
-    display: flex;
-}
-
-.modal-box {
-    background: white;
-    border-radius: 14px;
-    padding: 24px 28px;
-    text-align: center;
-    min-width: 280px;
-
-    /* TAMBAH INI */
-    max-height: 90vh;
-    overflow-y: auto;
-
-    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-}
-
-.modal-box h3 {
-    font-size: 16px;
-    margin-bottom: 8px;
-}
-
-  /* ── RECORDS TABLE ── */
-  .records-table { width: 100%; font-size: 10px; border-collapse: collapse; }
-  .records-table th { background: #7C3AED; color: white; padding: 4px 6px; }
-  .records-table td { padding: 4px 6px; border-bottom: 1px solid #eee; }
-  .records-table tr:nth-child(even) td { background: #f9f9f9; }
-
-  .spacer { flex: 1; }
-
-  @media (max-width: 520px) {
-    #app { width: 100%; min-height: 100vh; border-radius: 0; }
-    .mp-right { width: 110px; }
-  }
+#app-inner { position: relative; z-index: 1; }
+.screen { display:none; animation: fadeUp .25s ease; }
+.screen.active { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.hdr { background:linear-gradient(135deg,#667eea,#764ba2); color:white; text-align:center; padding:14px 16px; font-family:'Fredoka One',cursive; font-size:23px; letter-spacing:1px; }
+.hdr small { font-family:'Nunito',sans-serif; font-size:11px; opacity:.8; display:block; }
+.btn { padding:10px 18px; border:none; border-radius:12px; cursor:pointer; font-family:'Nunito',sans-serif; font-weight:800; font-size:13px; transition:all .15s; display:inline-flex; align-items:center; gap:6px; }
+.btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,.2); }
+.btn:active { transform:translateY(0); }
+.btn:disabled { opacity:.5; cursor:default; }
+.btn-purple{background:#7C3AED;color:white} .btn-teal{background:#00C9A7;color:white}
+.btn-pink{background:#FF6B9D;color:white}   .btn-blue{background:#0EA5E9;color:white}
+.btn-grey{background:#E2E8F0;color:#334155} .btn-green{background:#16A34A;color:white}
+.btn-red{background:#EF4444;color:white}    .btn-amber{background:#F59E0B;color:white}
+.btn-full{width:100%;justify-content:center;margin:4px 0}
+.btn-sm{padding:5px 10px;font-size:11px}
+.f-label{font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:4px}
+input[type=text]{width:100%;padding:9px 12px;border:2px solid #E2E8F0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:13px;outline:none;transition:border .2s}
+input[type=text]:focus{border-color:#7C3AED}
+.sec-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.sec-btn{padding:12px 6px;border:3px solid transparent;border-radius:14px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:12px;text-align:center;line-height:1.5;transition:all .2s}
+.sec-btn:hover{transform:scale(1.04);box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.sec-btn.b1{background:#FFE4E1;border-color:#FF6B6B;color:#9B1C1C}
+.sec-btn.b2{background:#E1F5FE;border-color:#4ECDC4;color:#164E63}
+.sec-btn.b3{background:#FFF9C4;border-color:#F59E0B;color:#78350F}
+.game-wrap{display:flex;min-height:520px}
+.game-left{flex:1;padding:8px 12px 12px;min-width:0}
+.game-right{width:148px;min-width:148px;background:#F5F0FF;border-left:2px solid #E0D4FF;display:none;flex-direction:column}
+.game-right.show{display:flex}
+.live-hdr{background:#7C3AED;color:white;font-family:'Fredoka One',cursive;font-size:13px;text-align:center;padding:8px 4px;letter-spacing:.5px}
+.live-body{flex:1;overflow-y:auto;padding:6px 5px}
+.live-row{border-radius:10px;padding:5px 7px;margin-bottom:5px;transition:all .3s}
+.live-row.cur{box-shadow:0 0 0 2px #7C3AED}
+.lr-top{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:800}
+.lr-skor{margin-left:auto;color:#00C9A7;font-weight:800}
+.lr-bot{font-size:10px;font-weight:600;margin-top:2px}
+.status-bar{display:flex;align-items:center;gap:6px;background:#F8F0FF;border-radius:10px;padding:5px 8px;margin:4px 0;font-size:11px;font-weight:700}
+.lv-badge{padding:2px 7px;border-radius:7px;font-size:10px;font-weight:800;margin-left:auto}
+.q-sec{color:#A78BFA;font-weight:800;font-size:11px;margin:3px 0 1px}
+.q-num{color:#F97316;font-size:11px;font-weight:700}
+.q-text{background:#F0F4FF;border-left:4px solid #7C3AED;border-radius:0 12px 12px 0;padding:10px 12px;font-size:13px;font-weight:700;color:#1E3A5F;min-height:52px;line-height:1.5;margin:5px 0}
+.prog-wrap{background:#E5E7EB;border-radius:99px;height:6px;margin:4px 0;overflow:hidden}
+.prog-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,#7C3AED,#EC4899);transition:width .4s}
+.ans-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:5px 0}
+.ans-btn{padding:12px 6px;border:none;border-radius:13px;cursor:pointer;color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,.15);transition:all .15s}
+.ans-btn:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.ans-btn:disabled{cursor:default}
+.ans-btn.correct{background:#16A34A!important;animation:pop .35s ease}
+.ans-btn.wrong{background:#DC2626!important}
+@keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.g-footer{display:flex;align-items:center;gap:6px;padding:5px 0 2px;font-size:11px;font-weight:700}
+.timer{color:#0EA5E9} .timer.warn{color:#EF4444;animation:blink .5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.g-status{flex:1;font-size:10px}
+.g-status.ok{color:#16A34A} .g-status.fail{color:#DC2626}
+.g-skor{color:#00C9A7;margin-left:auto}
+.g-topbar{display:flex;align-items:center;gap:6px;padding:7px 10px;font-size:12px;font-weight:700;border-bottom:1px solid rgba(0,0,0,.06);background:rgba(255,255,255,.9)}
+.turn-emoji{font-size:68px;animation:bounce 1s infinite;display:block}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.turn-name{font-family:'Fredoka One',cursive;font-size:25px;color:#1E3A5F;margin:6px 0}
+.mini-scores{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0}
+.mini-card{padding:4px 9px;border-radius:9px;font-size:11px;font-weight:700;border:2px solid transparent}
+.rank-row{display:flex;align-items:center;padding:7px 10px;gap:8px;font-size:12px;font-weight:700}
+.rk-name{flex:1} .rk-pts{color:#00C9A7}
+.badge-box{background:#F3E8FF;border-radius:12px;padding:10px 12px;margin:7px 0}
+.badge-ttl{color:#7C3AED;font-weight:800;font-size:12px;margin-bottom:5px}
+.badge-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#5B21B6;padding:2px 0;font-weight:600}
+.p-list{max-height:165px;overflow-y:auto;padding:4px 0}
+.p-row{display:flex;align-items:center;gap:8px;padding:3px 8px}
+.p-emoji{font-size:18px;min-width:24px}
+.lb-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;margin:3px 0;background:#F8F8F8;font-size:12px;font-weight:700}
+.lb-name{flex:1} .lb-pts{color:#00C9A7}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.modal-bg.on{display:flex}
+.modal-box{background:white;border-radius:20px;padding:22px;max-width:400px;width:92%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:fadeUp .2s ease}
+.modal-ttl{font-family:'Fredoka One',cursive;font-size:20px;color:#1E3A5F;margin-bottom:10px}
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-70px);background:#1E3A5F;color:white;padding:9px 20px;border-radius:99px;font-weight:700;font-size:13px;z-index:999;transition:transform .3s;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.pad{padding:14px 16px}
+hr{border:none;border-top:1px solid #E5E7EB;margin:10px 0}
+.row{display:flex;gap:8px} .row .btn{flex:1;justify-content:center}
+.mt6{margin-top:6px} .info-box{background:#FFF9E6;border-radius:10px;padding:6px 12px;font-size:11px;color:#F97316;font-weight:700;text-align:center;margin:6px 0}
 </style>
 </head>
 <body>
 <div id="app">
+  <div id="app-bg"></div>
+  <div id="app-inner">
 
-  <!-- FULLSCREEN BG -->
-  <div id="bg-layer" class="bg-main"></div>
-  <div id="bg-tint"></div>
-
-<!-- ===== MENU UTAMA ===== -->
-<div id="screen-menu" class="screen active">
-  <h1 style="margin-top:10px;">🎮 Sifir X</h1>
-  <p style="text-align:center;font-size:11px;color:#333;margin:4px 0 10px;font-weight:bold;">Kuiz Matematik Interaktif</p>
-  <div class="tab-row">
-    <button class="btn tab-btn" style="background:#CCE5FF;color:#000;" onclick="showScreen('screen-solo')">👤 Solo</button>
-    <button class="btn tab-btn" style="background:#D4EDDA;color:#000;" onclick="showScreen('screen-multiplayer')">👥 Multiplayer</button>
-  </div>
-  <p style="text-align:center;font-size:10px;color:#555;margin:2px 0 12px;font-weight:bold;">— atau pilih mod di atas —</p>
-  <div style="display:flex;flex-direction:column;gap:8px;align-items:center;">
-    <button class="btn" style="background:rgba(254,249,195,0.92);color:#000;width:200px;" onclick="showLeaderboard()">🏆 Leaderboard</button>
-    <button class="btn" style="background:rgba(243,232,255,0.92);color:#000;width:200px;" onclick="showBadgeList()">📖 Senarai Badge</button>
-  </div>
-  <div class="spacer"></div>
-</div>
-
-<!-- ===== SOLO SETUP ===== -->
-<div id="screen-solo" class="screen">
-  <h2>👤 Mod Solo</h2>
-  <div class="card">
-    <label>Nama Pemain:</label>
-    <input type="text" id="solo-name" placeholder="Masukkan nama..." maxlength="20">
-    <label class="checkbox-row" style="margin-top:6px;">
-      <input type="checkbox" id="exam-mode-solo" onchange="updateExamLabel('solo')">
-      <span id="exam-label-solo">Mode Peperiksaan: OFF</span>
-    </label>
-    <div class="info-box">❤️ 10 Nyawa &nbsp; 🔥 Combo &nbsp; 📈 Level Auto &nbsp; 🏆 Badge</div>
-  </div>
-  <p style="text-align:center;font-size:12px;font-weight:bold;color:#5b21b6;margin:8px 0 4px;">Pilih Bahagian:</p>
-  <div class="bahagian-grid">
-    <button class="bah-btn" style="background:#FFB6C1;color:#000;" onclick="mulaSolo(1)">Bahagian 1<br>(Sifir)</button>
-    <button class="bah-btn" style="background:#B6D7FF;color:#000;" onclick="mulaSolo(2)">Bahagian 2<br>(Tukar Unit)</button>
-    <button class="bah-btn" style="background:#FFFACD;color:#000;" onclick="mulaSolo(3)">Bahagian 3<br>(Masalah)</button>
-  </div>
-  <div class="spacer"></div>
-  <button class="btn" style="background:rgba(226,232,240,0.9);color:#000;" onclick="showScreen('screen-menu')">← Balik</button>
-</div>
-
-<!-- ===== MULTIPLAYER SETUP ===== -->
-<div id="screen-multiplayer" class="screen">
-  <h2>👥 Mod Multiplayer</h2>
-  <div class="card">
-    <div class="count-row">
-      <span style="font-size:12px;color:#333;font-weight:bold;">Pemain:</span>
-      <span class="count-badge" id="player-count-badge">2</span>
-      <button class="btn" style="background:#D4EDDA;color:#000;font-size:10px;padding:4px 10px;" onclick="addPlayer()">➕ Tambah</button>
-      <button class="btn" style="background:#FFE4E1;color:#000;font-size:10px;padding:4px 10px;" onclick="removePlayer()">➖ Kurang</button>
-    </div>
-    <p style="font-size:11px;font-weight:bold;margin:4px 0;">Nama Pemain:</p>
-    <div class="scroll-area" id="player-entries-wrap"></div>
-    <label class="checkbox-row" style="margin-top:6px;">
-      <input type="checkbox" id="exam-mode-mp" onchange="updateExamLabel('mp')">
-      <span id="exam-label-mp">Mode Peperiksaan: OFF</span>
-    </label>
-  </div>
-  <p style="text-align:center;font-size:11px;font-weight:bold;color:#5b21b6;margin:4px 0;">Pilih Bahagian:</p>
-  <div class="bahagian-grid">
-    <button class="bah-btn" style="background:#FFB6C1;color:#000;" onclick="mulaMultiplayer(1)">Bahagian 1<br>(Sifir)</button>
-    <button class="bah-btn" style="background:#B6D7FF;color:#000;" onclick="mulaMultiplayer(2)">Bahagian 2<br>(Tukar Unit)</button>
-    <button class="bah-btn" style="background:#FFFACD;color:#000;" onclick="mulaMultiplayer(3)">Bahagian 3<br>(Masalah)</button>
-  </div>
-  <div class="spacer"></div>
-  <button class="btn" style="background:rgba(226,232,240,0.9);color:#000;" onclick="showScreen('screen-menu')">← Balik</button>
-</div>
-
-<!-- ===== GILIRAN ===== -->
-<div id="screen-giliran" class="screen">
-  <div class="giliran-wrap">
-    <div class="giliran-card" id="giliran-card">
-      <div class="giliran-emoji" id="giliran-emoji">🦁</div>
-      <div class="giliran-name" id="giliran-name">Ali</div>
-      <div class="giliran-info" id="giliran-info">Skor semasa: 0 | ❤️❤️❤️</div>
-      <div class="giliran-scores" id="giliran-scores"></div>
-      <button class="btn" id="giliran-start-btn" style="background:#4ECDC4;color:white;font-size:14px;padding:12px 24px;" onclick="mulaGiliranPemain()">▶ Mula Giliran</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== SOALAN SOLO ===== -->
-<div id="screen-soalan-solo" class="screen">
-  <div class="top-bar">
-    <span class="top-bar-left" id="solo-player-label">👤 Pemain</span>
-    <div class="top-bar-right">
-      <button class="mini-btn" style="background:#FFF3CD;" onclick="showLeaderboard()">🏆</button>
-      <button class="mini-btn" style="background:#CCE5FF;" onclick="goMenu()">Menu</button>
-      <button class="mini-btn" style="background:#FFCCCC;" onclick="goMenu()">✕</button>
-    </div>
-  </div>
-  <div class="status-bar">
-    <span class="nyawa-txt" id="solo-nyawa">❤️❤️❤️</span>
-    <span class="combo-txt" id="solo-combo">🔥 Combo: —</span>
-    <span class="level-badge" id="solo-level" style="background:#90EE90;">📈 Level 1: Mudah</span>
-  </div>
-  <div class="section-label" id="solo-section-label">Bahagian 1: Sifir</div>
-  <div class="question-num" id="solo-qnum">Soalan 0/10</div>
-  <div class="question-text" id="solo-question">Memuatkan...</div>
-  <div class="answer-grid">
-    <button class="answer-btn" style="background:#FF6B6B;" onclick="handleAnswer(0)" id="btn-0"></button>
-    <button class="answer-btn" style="background:#4ECDC4;" onclick="handleAnswer(1)" id="btn-1"></button>
-    <button class="answer-btn" style="background:#45B7D1;" onclick="handleAnswer(2)" id="btn-2"></button>
-    <button class="answer-btn" style="background:#FFA07A;" onclick="handleAnswer(3)" id="btn-3"></button>
-  </div>
-  <div class="progress-bar-wrap"><div class="progress-bar" id="solo-progress" style="width:0%"></div></div>
-  <div class="footer-row">
-    <span class="timer-txt" id="solo-timer">⏱ 0.0s</span>
-    <span class="status-txt" id="solo-status"></span>
-    <span class="score-txt" id="solo-score">Skor: 0</span>
-  </div>
-</div>
-
-<!-- ===== SOALAN MULTIPLAYER ===== -->
-<div id="screen-soalan-mp" class="screen">
-  <div class="top-bar" id="mp-top-bar">
-    <span class="top-bar-left" id="mp-player-label">🦁 Giliran: Ali</span>
-    <div class="top-bar-right">
-      <button class="mini-btn" style="background:#CCE5FF;" onclick="goMenu()">Menu</button>
-      <button class="mini-btn" style="background:#FFCCCC;" onclick="goMenu()">✕</button>
-    </div>
-  </div>
-  <div class="mp-content">
-    <div class="mp-left">
-      <div class="status-bar" id="mp-status-bar">
-        <span class="nyawa-txt" id="mp-nyawa">❤️❤️❤️</span>
-        <span class="combo-txt" id="mp-combo">🔥 Combo: —</span>
-        <span class="level-badge" id="mp-level" style="background:#90EE90;">📈 L1:Mudah</span>
+  <div id="s-menu" class="screen active">
+    <div class="hdr">🎮 Permainan Bijak Sifir<small>Matematik Seronok & Mencabar!</small></div>
+    <div class="pad">
+      <div class="row" style="margin:10px 0 6px">
+        <button class="btn btn-blue" onclick="go('s-solo')">👤 Solo</button>
+        <button class="btn btn-green" onclick="go('s-multi')">👥 Multiplayer</button>
       </div>
-      <div class="section-label" id="mp-section-label">Bahagian 1: Sifir</div>
-      <div class="question-num" id="mp-qnum">Soalan 0/10</div>
-      <div class="question-text" id="mp-question" style="font-size:12px;min-height:55px;">Memuatkan...</div>
-      <div class="answer-grid">
-        <button class="answer-btn" style="background:#FF6B6B;" onclick="handleAnswer(0)" id="mp-btn-0"></button>
-        <button class="answer-btn" style="background:#4ECDC4;" onclick="handleAnswer(1)" id="mp-btn-1"></button>
-        <button class="answer-btn" style="background:#45B7D1;" onclick="handleAnswer(2)" id="mp-btn-2"></button>
-        <button class="answer-btn" style="background:#FFA07A;" onclick="handleAnswer(3)" id="mp-btn-3"></button>
+      <div class="info-box">❤️ 10 Nyawa &nbsp;|&nbsp; 🔥 Combo &nbsp;|&nbsp; 📈 Level Auto &nbsp;|&nbsp; 🏆 Badge</div>
+      <hr>
+      <button class="btn btn-purple btn-full" onclick="openLB()">🏆 Leaderboard</button>
+      <button class="btn btn-grey btn-full mt6" onclick="openBadges()">📖 Senarai Badge</button>
+    </div>
+  </div>
+
+  <div id="s-solo" class="screen">
+    <div class="hdr">👤 Mod Solo</div>
+    <div class="pad">
+      <label class="f-label">Nama Pemain:</label>
+      <input type="text" id="solo-name" placeholder="Masukkan nama anda...">
+      <label style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:12px;font-weight:600;color:#64748B;cursor:pointer">
+        <input type="checkbox" id="exam-solo" style="width:15px;height:15px;accent-color:#7C3AED"> Mode Peperiksaan
+      </label>
+      <hr>
+      <div style="font-weight:800;color:#A78BFA;font-size:13px;margin-bottom:6px">Pilih Bahagian:</div>
+      <div class="sec-btns">
+        <button class="sec-btn b1" onclick="startSolo(1)">📐 Bahagian 1<br><small>Sifir</small></button>
+        <button class="sec-btn b2" onclick="startSolo(2)">📏 Bahagian 2<br><small>Tukar Unit</small></button>
+        <button class="sec-btn b3" onclick="startSolo(3)">🧮 Bahagian 3<br><small>Masalah</small></button>
       </div>
-      <div class="progress-bar-wrap"><div class="progress-bar" id="mp-progress" style="width:0%"></div></div>
-      <div class="footer-row">
-        <span class="timer-txt" id="mp-timer">⏱ 0.0s</span>
-        <span class="status-txt" id="mp-status"></span>
-        <span class="score-txt" id="mp-score">Skor: 0</span>
+      <button class="btn btn-grey btn-full mt6" onclick="go('s-menu')">← Balik</button>
+    </div>
+  </div>
+
+  <div id="s-multi" class="screen">
+    <div class="hdr">👥 Mod Multiplayer</div>
+    <div class="pad">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-weight:700;font-size:13px;color:#64748B">Pemain:</span>
+        <span id="mp-count" style="font-family:'Fredoka One',cursive;font-size:22px;color:#7C3AED;min-width:28px">2</span>
+        <button class="btn btn-green btn-sm" onclick="addPlayer()">➕ Tambah</button>
+        <button class="btn btn-red btn-sm" onclick="removePlayer()">➖ Kurang</button>
+        <span style="font-size:11px;color:#94A3B8">(min 2)</span>
+      </div>
+      <div style="background:#F0FFF4;border:2px solid #D1FAE5;border-radius:12px;padding:8px">
+        <div style="font-weight:800;font-size:12px;color:#065F46;margin-bottom:5px">Nama Pemain:</div>
+        <div class="p-list" id="p-list"></div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;margin:8px 0;font-size:12px;font-weight:600;color:#64748B;cursor:pointer">
+        <input type="checkbox" id="exam-mp" style="width:15px;height:15px;accent-color:#7C3AED"> Mode Peperiksaan
+      </label>
+      <hr>
+      <div style="font-weight:800;color:#A78BFA;font-size:13px;margin-bottom:6px">Pilih Bahagian:</div>
+      <div class="sec-btns">
+        <button class="sec-btn b1" onclick="startMulti(1)">📐 Bahagian 1<br><small>Sifir</small></button>
+        <button class="sec-btn b2" onclick="startMulti(2)">📏 Bahagian 2<br><small>Tukar Unit</small></button>
+        <button class="sec-btn b3" onclick="startMulti(3)">🧮 Bahagian 3<br><small>Masalah</small></button>
+      </div>
+      <button class="btn btn-grey btn-full mt6" onclick="go('s-menu')">← Balik</button>
+    </div>
+  </div>
+
+  <div id="s-turn" class="screen"><div id="turn-body"></div></div>
+
+  <div id="s-game" class="screen">
+    <div class="g-topbar" id="g-topbar"></div>
+    <div class="game-wrap">
+      <div class="game-left">
+        <div class="prog-wrap"><div class="prog-bar" id="g-prog" style="width:0%"></div></div>
+        <div class="status-bar">
+          <span id="g-nyawa" style="color:#EF4444">❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️</span>
+          <span id="g-combo" style="color:#F59E0B">🔥 —</span>
+          <span class="lv-badge" id="g-lv" style="background:#90EE90">📈 L1</span>
+        </div>
+        <div class="q-sec" id="g-sec">Bahagian 1</div>
+        <div class="q-num" id="g-qnum">Soalan 1/10</div>
+        <div class="q-text" id="g-q">—</div>
+        <div class="ans-grid" id="g-ans"></div>
+        <div class="g-footer">
+          <span class="timer" id="g-timer">⏱ 0.0s</span>
+          <span class="g-status" id="g-msg"></span>
+          <span class="g-skor" id="g-skor">Skor: 0</span>
+        </div>
+      </div>
+      <div class="game-right" id="live-panel">
+        <div class="live-hdr">🏆 Skor Live</div>
+        <div class="live-body" id="live-body"></div>
       </div>
     </div>
-    <div class="mp-right">
-      <div class="live-header">🏆 Skor Live</div>
-      <div class="live-body" id="live-scoreboard"></div>
-    </div>
+  </div>
+
+  <div id="s-over" class="screen">
+    <div class="hdr" style="background:linear-gradient(135deg,#DC2626,#F97316)">💔 Game Over!</div>
+    <div class="pad" id="over-body"></div>
+  </div>
+
+  <div id="s-tamat" class="screen">
+    <div class="hdr" style="background:linear-gradient(135deg,#16A34A,#0EA5E9)">🎉 Tamat!</div>
+    <div class="pad" id="tamat-body"></div>
+  </div>
+
+  <div id="s-winner" class="screen">
+    <div class="hdr" style="background:linear-gradient(135deg,#F59E0B,#EF4444)">🏆 Keputusan Akhir!</div>
+    <div class="pad" id="win-body"></div>
+  </div>
+
   </div>
 </div>
 
-<!-- ===== GAME OVER ===== -->
-<div id="screen-gameover" class="screen">
-  <div style="text-align:center;padding:20px 10px 10px;">
-    <div style="font-size:52px;">💔</div>
-    <h1 style="color:#DC2626;margin:6px 0;">Game Over!</h1>
-    <p id="go-name" style="font-size:13px;color:#FF6B9D;margin:4px 0;font-weight:bold;"></p>
-    <p id="go-score" style="font-size:14px;font-weight:bold;color:#00C9A7;margin:4px 0;"></p>
-  </div>
-  <div id="go-badges" style="margin:6px 0;"></div>
-  <div style="display:flex;flex-direction:column;gap:6px;align-items:center;margin-top:10px;">
-    <button class="btn" style="background:#FFB6C1;color:#000;width:180px;" onclick="showScreen('screen-menu')">Cuba Lagi</button>
-    <button class="btn" style="background:rgba(254,249,195,0.92);color:#000;width:180px;" onclick="showLeaderboard()">🏆 Leaderboard</button>
+<div class="toast" id="toast"></div>
+
+<div class="modal-bg" id="m-lb">
+  <div class="modal-box">
+    <div class="modal-ttl">🏆 Leaderboard</div>
+    <div id="lb-body"></div>
+    <button class="btn btn-grey btn-full mt6" onclick="closeM('m-lb')">Tutup</button>
   </div>
 </div>
 
-<!-- ===== TAMAT SOLO ===== -->
-<div id="screen-tamat" class="screen">
-  <div style="text-align:center;padding:10px 6px 4px;">
-    <div style="font-size:38px;">🎉</div>
-    <h1 style="font-size:18px;">Tamat! 🎉</h1>
-    <p id="tamat-name-score" style="font-size:12px;font-weight:bold;color:#FF6B9D;margin:4px 0;"></p>
-    <p id="tamat-bahagian" style="font-size:11px;color:#333;font-weight:bold;"></p>
-    <p id="tamat-nyawa" style="font-size:12px;color:#EF4444;margin:3px 0;"></p>
-    <p id="tamat-avg" style="font-size:11px;color:#0EA5E9;font-weight:bold;"></p>
-    <p id="tamat-level" style="font-size:11px;font-weight:bold;color:#1E3A5F;margin:3px 0;"></p>
-  </div>
-  <div id="tamat-badges" style="margin:4px 0;"></div>
-  <div style="display:flex;flex-direction:column;gap:5px;align-items:center;margin-top:6px;">
-    <button class="btn" style="background:#E0F2FE;color:#000;width:180px;" onclick="showRecords()">📋 Lihat Rekod</button>
-    <button class="btn" style="background:#DCFCE7;color:#000;width:180px;" onclick="showScreen('screen-menu')">🏠 Menu Utama</button>
-    <button class="btn" style="background:rgba(254,249,195,0.92);color:#000;width:180px;" onclick="showLeaderboard()">🏆 Leaderboard</button>
+<div class="modal-bg" id="m-bdg">
+  <div class="modal-box">
+    <div class="modal-ttl">📖 Senarai Badge</div>
+    <div id="bdg-body"></div>
+    <button class="btn btn-grey btn-full mt6" onclick="closeM('m-bdg')">Tutup</button>
   </div>
 </div>
 
-<!-- ===== PEMENANG ===== -->
-<div id="screen-pemenang" class="screen">
-  <h1 style="font-size:16px;margin-bottom:4px;">🏆 Keputusan Akhir! 🏆</h1>
-  <div class="winner-card" id="winner-card">
-    <p style="font-size:13px;font-weight:bold;color:#000;">🥇 PEMENANG!</p>
-    <p id="winner-emoji-name" style="font-size:22px;font-weight:bold;color:#FF6B9D;"></p>
-    <p id="winner-score" style="font-size:13px;color:#00C9A7;"></p>
-  </div>
-  <p style="font-size:11px;font-weight:bold;color:#7C3AED;margin:4px 0;">Kedudukan Semua Pemain:</p>
-  <div id="all-ranks" style="max-height:190px;overflow-y:auto;"></div>
-  <p id="tie-notice" style="text-align:center;font-size:12px;font-weight:bold;color:#000;margin:4px 0;display:none;">🤝 Seri! Tahniah semua!</p>
-  <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
-    <button class="btn" style="background:#DCFCE7;color:#000;" onclick="showScreen('screen-menu')">🔄 Main Lagi</button>
-    <button class="btn" style="background:rgba(254,249,195,0.92);color:#000;" onclick="showLeaderboard()">🏆 Leaderboard</button>
-  </div>
-</div>
-
-<!-- MODALS -->
-<div class="modal-overlay" id="modal-level"><div class="modal-box"><h3 id="modal-level-text"></h3></div></div>
-<div class="modal-overlay" id="modal-leaderboard">
-  <div class="modal-box" style="width:420px;max-width:95vw;">
-    <h3>🏆 Top 10 Leaderboard</h3>
-    <div id="lb-content" style="max-height:300px;overflow-y:auto;margin:10px 0;text-align:left;"></div>
-    <button class="btn" style="background:#E2E8F0;color:#000;" onclick="closeModal('modal-leaderboard')">Tutup</button>
-  </div>
-</div>
-<div class="modal-overlay" id="modal-badge-list">
-  <div class="modal-box" style="width:380px;max-width:95vw;">
-    <h3>📖 Semua Badge</h3>
-    <div class="badge-list" style="margin:10px 0;max-height:300px;overflow-y:auto;text-align:left;" id="badge-list-content"></div>
-    <button class="btn" style="background:#E2E8F0;color:#000;margin-top:6px;" onclick="closeModal('modal-badge-list')">Tutup</button>
-  </div>
-</div>
-<div class="modal-overlay" id="modal-records">
-  <div class="modal-box" style="width:460px;max-width:95vw;">
-    <h3>📋 Rekod Jawapan</h3>
-    <div style="max-height:300px;overflow-y:auto;margin:10px 0;" id="records-content"></div>
-    <button class="btn" style="background:#E2E8F0;color:#000;margin-top:6px;" onclick="closeModal('modal-records')">Tutup</button>
-  </div>
-</div>
-
-</div><!-- end #app -->
 <script>
-const EMOJI_POOL=["🦁","🐯","🐻","🦊","🐼","🐸","🦄","🐲","🦋","🐬","🦅","🐺","🦖","🐙","🦩","🐧"];
-const BTN_COLORS=["#FF6B6B","#4ECDC4","#45B7D1","#FFA07A"];
-const PLAYER_BG_COLORS=["#FFE4E1","#E1F5FE","#E8F5E9","#FFF9C4"];
-const PLAYER_BORDER_COLORS=["#FF6B6B","#4ECDC4","#66BB6A","#FFC107"];
-const MEDALS=["🥇","🥈","🥉","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣"];
-const BADGE_LIST={
-  "Sifir Master":  {desc:"Dapat skor penuh di Bahagian 1",icon:"🌟"},
-  "Unit Champion": {desc:"Dapat skor penuh di Bahagian 2",icon:"📏"},
-  "Problem Solver":{desc:"Dapat skor penuh di Bahagian 3",icon:"🧠"},
-  "Perfect Score": {desc:"Jawab semua soalan betul!",icon:"💯"},
-  "Speed Genius":  {desc:"Purata masa jawapan < 5 saat",icon:"⚡"},
-  "Combo King":    {desc:"5 jawapan betul berturut-turut",icon:"🔥"},
-  "Survivor":      {desc:"Habiskan permainan tanpa hilang nyawa",icon:"❤️"},
-  "Level Master":  {desc:"Capai Level 3",icon:"🚀"},
-  "Quick Thinker": {desc:"Jawab soalan dalam masa < 3 saat",icon:"💨"},
+const FILES={
+  mainBg:'main background.jpg',
+  bg:{1:'first background.jpg',2:'second background.jpg',3:'Escuela.jpg'},
+  music:'detective-story-224266.mp3',
+  ok:'correct-356013.mp3',
+  wrong:'wrong-47985.mp3'
 };
-const LEVEL_CONFIG={
-  1:{nama:"Mudah",masa_limit:30,bonus_combo:1,color:"#90EE90"},
-  2:{nama:"Sederhana",masa_limit:20,bonus_combo:2,color:"#FFD700"},
-  3:{nama:"Susah",masa_limit:12,bonus_combo:3,color:"#FF6B6B"},
+const music=new Audio(FILES.music);music.loop=true;music.volume=0.45;
+const sfxOk=new Audio(FILES.ok);
+const sfxWrong=new Audio(FILES.wrong);
+function playMusic(){if(!G.exam){music.currentTime=0;music.play().catch(()=>{});}}
+function stopMusic(){music.pause();music.currentTime=0;}
+function playSfx(s){if(!G.exam){s.currentTime=0;s.play().catch(()=>{});}}
+function setBg(img){document.getElementById('app-bg').style.backgroundImage=`url('${img}')`;}
+
+const EMOJIS=['🦁','🐯','🐻','🦊','🐼','🐸','🦄','🐲','🦋','🐬','🦅','🐺','🦖','🐙','🦩','🐧','🐮','🐷','🐨','🦒','🦓','🦏','🦛','🐘','🦘','🦙','🐃','🦬','🐉','🦤'];
+const BTNS=['#FF6B6B','#4ECDC4','#45B7D1','#FFA07A'];
+const PBG=['#FFE4E1','#E1F5FE','#E8F5E9','#FFF9C4','#F3E8FF','#FFF0F6','#E0F7FA','#FFF8E1','#ECFDF5','#FEF9C3'];
+const PBD=['#FF6B6B','#4ECDC4','#66BB6A','#FFC107','#AB47BC','#F06292','#26C6DA','#FFA726','#10B981','#FBBF24'];
+const QN=10;
+const MAXNYAWA=10;
+const LV={1:{n:'Mudah',t:30,b:1,bg:'#90EE90'},2:{n:'Sederhana',t:20,b:2,bg:'#FFD700'},3:{n:'Susah',t:12,b:3,bg:'#FF6B6B'}};
+const BADGES={
+  'Sifir Master':{d:'Skor penuh Bahagian 1',i:'🌟'},'Unit Champion':{d:'Skor penuh Bahagian 2',i:'📏'},
+  'Problem Solver':{d:'Skor penuh Bahagian 3',i:'🧠'},'Perfect Score':{d:'Semua soalan betul!',i:'💯'},
+  'Speed Genius':{d:'Purata masa < 5 saat',i:'⚡'},'Combo King':{d:'5 betul berturut-turut',i:'🔥'},
+  'Survivor':{d:'Habis tanpa hilang nyawa',i:'❤️'},'Level Master':{d:'Capai Level 3',i:'🚀'},
+  'Quick Thinker':{d:'Jawab dalam < 3 saat',i:'💨'}
 };
-const LEVEL_UP_THRESHOLD=4, LEVEL_DOWN_THRESHOLD=3, SOALAN_PER_BAHAGIAN=10;
 
-let modeMultiplayer=false,modeExam=false,bahagian=1,bahagianDipilih=1;
-let namaPemain="",skor=0,soalanKeGlobal=0,rekodJawapan=[],skorBahagian={1:0,2:0,3:0};
-let nyawa=3,comboStreak=0,currentLevel=1,badgesEarned=[],wrongStreak=0;
-let senaraipemain=[],pemainSemasaIdx=0,playerEntries=[];
-let timerInterval=null,masaMula=0,masaDiambil=0,currentAnswer=0,answerable=true;
-let soalanQueue=[];
-let leaderboard=JSON.parse(localStorage.getItem('sifirx_lb')||'[]');
+let G={},tid=null;
+function resetG(){G={mode:'solo',bah:1,exam:false,name:'',skor:0,nyawa:MAXNYAWA,combo:0,lv:1,ws:0,rekod:[],bdg:[],qi:0,ans:null,t0:0,players:[],cp:0};}
+resetG();
 
-// BG
-function setBg(bah){
-  const el=document.getElementById('bg-layer');
-  const map={0:'bg-main',1:'bg-b1',2:'bg-b2',3:'bg-b3'};
-  el.className='bg-layer '+(map[bah]||'bg-main') + ' ' + (map[bah]||'bg-main');
-  el.className=`bg-layer ${map[bah]||'bg-main'}`;
+let mpE=[];
+function initMP(){mpE=[];document.getElementById('p-list').innerHTML='';_addRow();_addRow();}
+function _addRow(){
+  const i=mpE.length,em=EMOJIS[i%EMOJIS.length];
+  const d=document.createElement('div');d.className='p-row';
+  d.innerHTML=`<span class="p-emoji">${em}</span><input type="text" placeholder="Pemain ${i+1}..." style="margin:0;padding:6px 10px;flex:1">`;
+  document.getElementById('p-list').appendChild(d);
+  mpE.push(d.querySelector('input'));
+  document.getElementById('mp-count').textContent=mpE.length;
 }
+function addPlayer(){_addRow();}
+function removePlayer(){
+  if(mpE.length<=2){showToast('⚠️ Minimum 2 pemain!');return;}
+  mpE.pop();const l=document.getElementById('p-list');l.removeChild(l.lastChild);
+  document.getElementById('mp-count').textContent=mpE.length;
+}
+initMP();
 
-// SCREEN
-function showScreen(id){
+function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  if(['screen-menu','screen-solo','screen-multiplayer','screen-gameover','screen-tamat','screen-pemenang'].includes(id)) setBg(0);
+  if(['s-menu','s-solo','s-multi','s-over','s-tamat','s-winner'].includes(id))setBg(FILES.mainBg);
+  if(id==='s-menu')stopMusic();
 }
-function goMenu(){ stopTimer(); stopMusic(); showScreen('screen-menu'); }
-function updateExamLabel(m){
-  const checked=document.getElementById(m==='solo'?'exam-mode-solo':'exam-mode-mp').checked;
-  document.getElementById(m==='solo'?'exam-label-solo':'exam-label-mp').textContent=checked?'Mode Peperiksaan: ON':'Mode Peperiksaan: OFF';
+function emo(n){let s=0;for(let c of n)s+=c.charCodeAt(0);return EMOJIS[s%EMOJIS.length];}
+
+function startSolo(b){
+  const nm=document.getElementById('solo-name').value.trim();
+  if(!nm){showToast('⚠️ Sila masukkan nama!');return;}
+  resetG();G.mode='solo';G.name=nm;G.bah=b;
+  G.exam=document.getElementById('exam-solo').checked;
+  setBg(FILES.bg[b]);playMusic();
+  document.getElementById('live-panel').classList.remove('show');
+  go('s-game');nextQ();
 }
 
-// MODAL
-function showModal(id){document.getElementById(id).classList.add('active');}
-function closeModal(id){document.getElementById(id).classList.remove('active');}
-function showLevelPopup(msg){document.getElementById('modal-level-text').textContent=msg;showModal('modal-level');setTimeout(()=>closeModal('modal-level'),1800);}
+function startMulti(b){
+  const names=mpE.map(e=>e.value.trim());
+  if(names.some(n=>!n)){showToast('⚠️ Sila isi semua nama!');return;}
+  if(new Set(names).size!==names.length){showToast('⚠️ Nama mesti berbeza!');return;}
+  resetG();G.mode='multi';G.bah=b;
+  G.exam=document.getElementById('exam-mp').checked;
+  G.players=names.map(n=>({name:n,emoji:emo(n),skor:0,nyawa:MAXNYAWA,combo:0,lv:1,ws:0,rekod:[],bdg:[],over:false}));
+  G.cp=0;setBg(FILES.bg[b]);playMusic();showTurn();
+}
 
-// EMOJI
-function getEmojiForName(n){let i=0;for(let c of n)i+=c.charCodeAt(0);return EMOJI_POOL[i%EMOJI_POOL.length];}
+function showTurn(){
+  const p=G.players[G.cp],bg=PBG[G.cp%PBG.length],bd=PBD[G.cp%PBD.length];
+  const minis=G.players.map((px,i)=>`<div class="mini-card" style="background:${PBG[i%PBG.length]};border-color:${PBD[i%PBD.length]}">${px.emoji} ${px.name.slice(0,7)}<br><b>${px.skor}</b> ${px.over?'💀':'❤'.repeat(px.nyawa)}</div>`).join('');
+  document.getElementById('turn-body').innerHTML=`<div style="background:${bg};padding:30px 20px;text-align:center;min-height:580px">
+    <span class="turn-emoji">${p.emoji}</span><div class="turn-name">${p.name}</div>
+    <div style="color:#64748B;font-size:12px;margin:4px 0 12px">Skor: <b>${p.skor}</b> | ${'❤️'.repeat(p.nyawa)}</div>
+    <div class="mini-scores">${minis}</div>
+    <button class="btn" style="background:${bd};color:white;font-size:14px;padding:12px 24px;margin-top:14px" onclick="beginTurn()">▶ Mula Giliran ${p.emoji} ${p.name}</button>
+  </div>`;
+  go('s-turn');
+}
+function beginTurn(){
+  G.qi=0;go('s-game');
+  document.getElementById('live-panel').classList.add('show');
+  renderLive();nextQ();
+}
 
-// PLAYER ENTRIES
-function buildPlayerEntries(count){
-  const wrap=document.getElementById('player-entries-wrap');
-  wrap.innerHTML='';playerEntries=[];
-  for(let i=0;i<count;i++){
-    const emoji=EMOJI_POOL[i%EMOJI_POOL.length];
-    const row=document.createElement('div');
-    row.className='player-entry-row';
-    row.innerHTML=`<span class="player-label">${emoji} Pemain ${i+1}:</span><input type="text" placeholder="Nama..." maxlength="20" style="width:100%;font-size:12px;">`;
-    wrap.appendChild(row);playerEntries.push(row.querySelector('input'));
+function renderLive(){
+  if(G.mode!=='multi')return;
+  const sorted=[...G.players.map((p,i)=>({...p,_i:i}))].sort((a,b)=>b.skor-a.skor);
+  const M=['🥇','🥈','🥉'];
+  document.getElementById('live-body').innerHTML=sorted.map((p,r)=>{
+    const bg=PBG[p._i%PBG.length],bd=PBD[p._i%PBD.length],ic=p._i===G.cp;
+    const nw=p.over?'💀':'❤'.repeat(p.nyawa);
+    return `<div class="live-row ${ic?'cur':''}" style="background:${bg};border:2px solid ${ic?bd:'transparent'}">
+      <div class="lr-top"><span>${M[r]||r+1+'.'}</span><span>${p.emoji}</span>
+        <span style="max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
+        <span class="lr-skor">${p.skor}</span></div>
+      <div class="lr-bot" style="color:${bd}">${nw} ${p.bdg.map(b=>BADGES[b]?.i||'').join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTopBar(){
+  const el=document.getElementById('g-topbar');
+  if(G.mode==='solo'){
+    el.innerHTML=`<span style="color:#FF6B9D;font-weight:800">${emo(G.name)} ${G.name}</span>
+      <div style="margin-left:auto;display:flex;gap:4px">
+        <button class="btn btn-grey btn-sm" onclick="openLB()">🏆</button>
+        <button class="btn btn-grey btn-sm" onclick="go('s-menu')">Menu</button></div>`;
+  }else{
+    const p=G.players[G.cp],bd=PBD[G.cp%PBD.length];
+    el.innerHTML=`<div style="background:${bd};color:white;padding:3px 10px;border-radius:8px;font-weight:800;font-size:12px">${p.emoji} ${p.name}</div>
+      <span style="font-size:10px;color:#64748B">giliran ${G.cp+1}/${G.players.length}</span>
+      <div style="margin-left:auto"><button class="btn btn-grey btn-sm" onclick="go('s-menu')">✕</button></div>`;
   }
-  document.getElementById('player-count-badge').textContent=count;
 }
-function addPlayer(){if(playerEntries.length<8)buildPlayerEntries(playerEntries.length+1);}
-function removePlayer(){if(playerEntries.length>2)buildPlayerEntries(playerEntries.length-1);}
-buildPlayerEntries(2);
 
-// SOALAN POOL
-function buatPoolSifir(){
-  const pool=[];
-  for(let a=2;a<=12;a++)for(let b=2;b<=12;b++){
-    const jawapan=a*b;const teks=`${a} × ${b} = ?`;
-    let choices=[jawapan];
-    while(choices.length<4){let c=jawapan+randChoice([-randInt(1,15),randInt(1,15)]);if(c>0&&!choices.includes(c))choices.push(c);}
-    shuffle(choices);pool.push({teks,jawapan,choices});
-  }
-  return pool;
+function updateUI(){
+  const ny=G.mode==='solo'?G.nyawa:G.players[G.cp].nyawa;
+  const co=G.mode==='solo'?G.combo:G.players[G.cp].combo;
+  const lv=G.mode==='solo'?G.lv:G.players[G.cp].lv;
+  const sk=G.mode==='solo'?G.skor:G.players[G.cp].skor;
+  document.getElementById('g-nyawa').textContent='❤️'.repeat(ny);
+  document.getElementById('g-combo').textContent=co===0?'🔥 —':co<3?`🔥 x${co}`:`🔥🔥 x${co}!`;
+  const lel=document.getElementById('g-lv');lel.textContent=`📈 L${lv} ${LV[lv].n}`;lel.style.background=LV[lv].bg;
+  document.getElementById('g-skor').textContent=`Skor: ${sk}`;
 }
-function buatPoolTukarUnit(){
-  const pool=[];
-  const tambah=(teks,jawapan)=>{
-    let choices=[jawapan];
-    while(choices.length<4){let d=jawapan<10?randInt(1,3):(jawapan<100?randChoice([5,10,15,20]):randChoice([10,50,100,200,500]));let p=jawapan+randChoice([-d,d]);if(p>0&&!choices.includes(p))choices.push(p);}
-    shuffle(choices);pool.push({teks,jawapan,choices});
-  };
-  for(let v=1;v<=20;v++)tambah(`${v} kg = ? g`,v*1000);
-  for(const v of[1000,2000,3000,4000,5000,6000,8000,10000])tambah(`${v} g = ? kg`,v/1000);
-  for(let v=1;v<=20;v++)tambah(`${v} L = ? mL`,v*1000);
-  for(const v of[1000,2000,3000,4000,5000,6000])tambah(`${v} mL = ? L`,v/1000);
-  for(let v=1;v<=10;v++)tambah(`${v} jam = ? minit`,v*60);
-  for(const v of[60,120,180,240,300,360])tambah(`${v} minit = ? jam`,v/60);
-  for(let v=1;v<=7;v++)tambah(`${v} hari = ? jam`,v*24);
-  for(let v=1;v<=4;v++)tambah(`${v} minggu = ? hari`,v*7);
-  return pool;
-}
-function buatPoolMasalah(){
-  const semua=[
-    {teks:"Alia mempunyai 2 gulung riben: 32 cm dan 57 cm. Berapakah jumlah panjang dalam mm?",jawapan:890,pilihan_salah:[880,900,89]},
-    {teks:"Sebuah kek dipotong kepada 8 bahagian. Aina makan 3/8 dan adiknya 2/8. Berapa bahagian tinggal?",jawapan:3,pilihan_salah:[5,2,4]},
-    {teks:"Mat ada kertas 76 meter. Adiknya potong 34 meter. Panjang tinggal dalam sentimeter?",jawapan:4200,pilihan_salah:[42,420,4000]},
-    {teks:"Berat sebiji durian 0.5 kg. Hanafi beli 6 biji. Jumlah berat dalam gram?",jawapan:3000,pilihan_salah:[3,300,30000]},
-    {teks:"Rauf bermain bola 30 minit sehari. Jumlah masa seminggu dalam jam?",jawapan:3.5,pilihan_salah:[3,4,210]},
-    {teks:"Sofia dapat cuti sakit 3 hari, kemudian 4 hari lagi. Jumlah hari dalam minggu?",jawapan:1,pilihan_salah:[7,2,3]},
-    {teks:"Haziq bawa 2 liter air. Baki 500 ml. Berapa liter diminum?",jawapan:1.5,pilihan_salah:[1,2,0.5]},
-    {teks:"Bekalan air 6000 L. Guna 250 L sehari. Tahan berapa hari?",jawapan:24,pilihan_salah:[20,25,30]},
-    {teks:"Buku RM5.90 sebiji. Haidhar beli 5 buah. Baki dari RM50?",jawapan:20.5,pilihan_salah:[20,21,19.5]},
-    {teks:"Satu tin cat 2.5 L. Pak Ali beli 4 tin. Jumlah cat dalam mL?",jawapan:10000,pilihan_salah:[1000,2500,4000]},
-    {teks:"Jarak dari rumah ke sekolah 1.2 km. Berapa meter pergi dan balik?",jawapan:2400,pilihan_salah:[1200,2000,2600]},
-    {teks:"Harga sebiji epal RM0.80. Kakak beli 15 biji. Jumlah harga?",jawapan:12,pilihan_salah:[10,11,15]},
-  ];
-  return semua.map(s=>{let c=[s.jawapan,...s.pilihan_salah];shuffle(c);return {teks:s.teks,jawapan:s.jawapan,choices:c};});
-}
-function binaQueueSoalan(b){
-  let pool=b===1?buatPoolSifir():(b===2?buatPoolTukarUnit():buatPoolMasalah());
-  shuffle(pool);soalanQueue=pool.slice(0,SOALAN_PER_BAHAGIAN);
-}
-function janasoalan(){return soalanQueue[soalanKeGlobal-1]||soalanQueue[0];}
 
-// UTILS
-function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function randChoice(arr){return arr[Math.floor(Math.random()*arr.length)];}
-function shuffle(arr){for(let i=arr.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}}
-function getNyawaTeks(n){return"❤️".repeat(n)+"🖤".repeat(10-n);}
-function getComboTeks(c){return c===0?"🔥 Combo: —":(c<3?`🔥 Combo: x${c}`:`🔥🔥 Combo: x${c}!`);}
-function getBahagianName(b){return{1:"Sifir",2:"Penukaran Unit",3:"Penyelesaian Masalah"}[b];}
+function clv(){return G.mode==='solo'?G.lv:G.players[G.cp].lv;}
+function ri(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function shuf(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
 
-// TIMER
-function stopTimer(){if(timerInterval){clearInterval(timerInterval);timerInterval=null;}}
-function startTimer(lv,elemId){
-  stopTimer();masaMula=performance.now();
-  timerInterval=setInterval(()=>{
-    const elapsed=(performance.now()-masaMula)/1000;
-    const limit=LEVEL_CONFIG[lv].masa_limit;
-    const el=document.getElementById(elemId);
-    if(el){el.textContent=`⏱ ${elapsed.toFixed(1)}s`;el.classList.toggle('warn',limit-elapsed<=5);}
-    if(elapsed>=limit){stopTimer();masaDiambil=elapsed;handleTimeout();}
+function genSifir(){
+  const lv=clv();let a,b;
+  if(lv===1){a=ri(2,5);b=ri(2,5);}else if(lv===2){a=ri(2,9);b=ri(2,9);}else{a=ri(6,12);b=ri(6,12);}
+  const ans=a*b;return{t:`${a} × ${b} = ?`,a:ans,c:shuf([ans,ans+ri(1,5),Math.max(1,ans-ri(1,5)),ans+ri(6,12)])};
+}
+function genUnit(){
+  const lv=clv();
+  const pools={1:['kg_g','l_ml','jam_min'],2:['kg_g','g_kg','l_ml','ml_l','jam_min','min_jam'],3:['kg_g','g_kg','l_ml','ml_l','jam_min','min_jam','hari_jam','minggu_hari']};
+  const j=pools[lv][Math.floor(Math.random()*pools[lv].length)];
+  let t,ans;
+  if(j==='kg_g'){const v=ri(1,20);t=`${v} kg = ? g`;ans=v*1000;}
+  else if(j==='g_kg'){const v=[1000,2000,3000,4000,5000,6000,8000,10000][ri(0,7)];t=`${v} g = ? kg`;ans=v/1000;}
+  else if(j==='l_ml'){const v=ri(1,20);t=`${v} L = ? mL`;ans=v*1000;}
+  else if(j==='ml_l'){const v=[1000,2000,3000,4000,5000,6000][ri(0,5)];t=`${v} mL = ? L`;ans=v/1000;}
+  else if(j==='jam_min'){const v=ri(1,10);t=`${v} jam = ? minit`;ans=v*60;}
+  else if(j==='min_jam'){const v=[60,120,180,240,300][ri(0,4)];t=`${v} minit = ? jam`;ans=v/60;}
+  else if(j==='hari_jam'){const v=ri(1,7);t=`${v} hari = ? jam`;ans=v*24;}
+  else{const v=ri(1,4);t=`${v} minggu = ? hari`;ans=v*7;}
+  const cs=new Set([ans]);
+  while(cs.size<4){const d=ans<10?ri(1,2):ans<100?ri(5,15):ri(10,100);const p2=ans+(Math.random()<.5?d:-d);if(p2>0)cs.add(p2);}
+  return{t,a:ans,c:shuf([...cs])};
+}
+const MP={
+  1:[{t:'Alia ada 2 gulung riben: 32cm dan 57cm. Jumlah dalam mm?',a:890,w:[880,900,89]},{t:'Kek dipotong 8 bahagian. Aina makan 3/8, adik 2/8. Baki?',a:3,w:[5,2,4]}],
+  2:[{t:'Mat ada kertas 76m. Adik potong 34m. Baki dalam cm?',a:4200,w:[42,420,4000]},{t:'Durian 0.5kg sebiji. Hanafi beli 6 biji. Jumlah dalam gram?',a:3000,w:[3,300,30000]},{t:'Rauf main bola 30 minit sehari. Jumlah seminggu dalam jam?',a:3.5,w:[3,4,210]}],
+  3:[{t:'Sofia cuti 3 hari lalu 4 hari lagi. Jumlah dalam minggu?',a:1,w:[7,2,3]},{t:'Haziq bawa 2L air. Baki 500ml. Berapa liter diminum?',a:1.5,w:[1,2,0.5]},{t:'Bekalan 6000L. Guna 250L sehari. Tahan berapa hari?',a:24,w:[20,25,30]},{t:'Buku RM5.90. Haidhar beli 5 buah. Baki dari RM50?',a:20.5,w:[20,21,19.5]}]
+};
+function genMasalah(){const lv=clv(),pool=MP[lv],s=pool[Math.floor(Math.random()*pool.length)];return{t:s.t,a:s.a,c:shuf([s.a,...s.w])};}
+function genQ(){return G.bah===1?genSifir():G.bah===2?genUnit():genMasalah();}
+
+function nextQ(){
+  G.qi++;if(G.qi>QN){G.mode==='multi'?endTurn():endSolo();return;}
+  renderTopBar();updateUI();if(G.mode==='multi')renderLive();
+  const q=genQ();G.ans=q.a;G.t0=Date.now();
+  const BN={1:'Sifir',2:'Tukar Unit',3:'Masalah Matematik'};
+  document.getElementById('g-sec').textContent=`Bahagian ${G.bah}: ${BN[G.bah]}`;
+  document.getElementById('g-qnum').textContent=`Soalan ${G.qi}/${QN}`;
+  document.getElementById('g-q').textContent=q.t;
+  document.getElementById('g-msg').textContent='';
+  document.getElementById('g-msg').className='g-status';
+  document.getElementById('g-prog').style.width=`${(G.qi-1)/QN*100}%`;
+  const grid=document.getElementById('g-ans');grid.innerHTML='';
+  q.c.forEach((c,i)=>{
+    const b=document.createElement('button');b.className='ans-btn';b.style.background=BTNS[i];b.textContent=c;
+    b.onclick=()=>onAns(c,b);grid.appendChild(b);
+  });
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(tid);const lim=LV[clv()].t;
+  tid=setInterval(()=>{
+    const el=document.getElementById('g-timer');if(!el){clearInterval(tid);return;}
+    const e=(Date.now()-G.t0)/1000;
+    el.textContent=`⏱ ${e.toFixed(1)}s`;el.className=e>=lim-5?'timer warn':'timer';
+    if(e>=lim){clearInterval(tid);onAns(null,null,true);}
   },100);
 }
-function handleTimeout(){masaDiambil=(performance.now()-masaMula)/1000;semakJawapan(null,true);}
 
-// AUDIO
-const bgMusic=new Audio('detective-story-224266.mp3');
-bgMusic.loop=true;bgMusic.volume=0.5;
-const sfxCorrect=new Audio('correct-356013.mp3');
-const sfxWrong=new Audio('wrong-47985.mp3');
-function startMusic(){if(!modeExam)bgMusic.play().catch(()=>{});}
-function stopMusic(){bgMusic.pause();bgMusic.currentTime=0;}
-function playSfx(type){
-  if(modeExam)return;
-  try{const s=(type==='correct'?sfxCorrect:sfxWrong).cloneNode();s.volume=0.7;s.play().catch(()=>{});}catch(e){}
+function onAns(val,btn,tout=false){
+  clearInterval(tid);const e=(Date.now()-G.t0)/1000,ans=G.ans;
+  const ok=!tout&&parseFloat(val)===parseFloat(ans);
+  document.querySelectorAll('.ans-btn').forEach(b=>{
+    b.disabled=true;
+    if(!G.exam)b.classList.add(parseFloat(b.textContent)===parseFloat(ans)?'correct':'wrong');
+  });
+  if(ok)doOk(e);else doFail(ans,tout,e);
 }
 
-// SOLO
-function mulaSolo(bah){
-  const nama=document.getElementById('solo-name').value.trim();
-  if(!nama){alert("Sila masukkan nama terlebih dahulu.");return;}
-  modeExam=document.getElementById('exam-mode-solo').checked;
-  modeMultiplayer=false;namaPemain=nama;bahagian=bah;bahagianDipilih=bah;
-  skor=0;soalanKeGlobal=0;rekodJawapan=[];skorBahagian={1:0,2:0,3:0};
-  nyawa=3;comboStreak=0;currentLevel=1;badgesEarned=[];wrongStreak=0;
-  binaQueueSoalan(bah);setBg(bah);
-  document.getElementById('solo-player-label').textContent=`👤 ${namaPemain}`;
-  showScreen('screen-soalan-solo');startMusic();soalanSeterusnya();
-}
-
-function soalanSeterusnya(){
-  soalanKeGlobal++;
-  if(soalanKeGlobal>SOALAN_PER_BAHAGIAN){if(modeMultiplayer)tamatGiliranPemain();else tamatPermainan();return;}
-  answerable=true;
-  const lv=modeMultiplayer?senaraipemain[pemainSemasaIdx].level:currentLevel;
-  const {teks,jawapan,choices}=janasoalan();
-  currentAnswer=jawapan;
-  if(modeMultiplayer)renderSoalanMP(teks,choices,lv);else renderSoalanSolo(teks,choices,lv);
-  startTimer(lv,modeMultiplayer?'mp-timer':'solo-timer');
-}
-
-function renderSoalanSolo(teks,choices,lv){
-  document.getElementById('solo-section-label').textContent=`Bahagian ${bahagian}: ${getBahagianName(bahagian)}`;
-  document.getElementById('solo-qnum').textContent=`Soalan ${soalanKeGlobal}/${SOALAN_PER_BAHAGIAN}`;
-  document.getElementById('solo-question').textContent=teks;
-  document.getElementById('solo-status').textContent='';
-  document.getElementById('solo-score').textContent=`Skor: ${skor}`;
-  document.getElementById('solo-nyawa').textContent=getNyawaTeks(nyawa);
-  document.getElementById('solo-combo').textContent=getComboTeks(comboStreak);
-  const lvEl=document.getElementById('solo-level');
-  lvEl.textContent=`📈 Level ${lv}: ${LEVEL_CONFIG[lv].nama}`;lvEl.style.background=LEVEL_CONFIG[lv].color;
-  for(let i=0;i<4;i++){const b=document.getElementById(`btn-${i}`);b.textContent=String(choices[i]);b.style.background=BTN_COLORS[i];b.style.color='white';b.disabled=false;}
-  document.getElementById('solo-progress').style.width=`${((soalanKeGlobal-1)/SOALAN_PER_BAHAGIAN)*100}%`;
-}
-
-function handleAnswer(idx){
-  if(!answerable)return;answerable=false;stopTimer();
-  masaDiambil=(performance.now()-masaMula)/1000;
-  const btnId=modeMultiplayer?`mp-btn-${idx}`:`btn-${idx}`;
-  let jv=document.getElementById(btnId).textContent;
-  jv=jv.includes('.')?parseFloat(jv):parseInt(jv);semakJawapan(jv);
-}
-
-function semakJawapan(jawapanUser,timeout=false){
-  const betul=!timeout&&jawapanUser==currentAnswer;
-  if(modeMultiplayer)semakJawapanMP(jawapanUser,betul,timeout);else semakJawapanSolo(jawapanUser,betul,timeout);
-}
-
-function semakJawapanSolo(jawapanUser,betul,timeout){
-  if(betul){
-    comboStreak++;wrongStreak=0;
-    const bonus=comboStreak>=3?LEVEL_CONFIG[currentLevel].bonus_combo:0;
-    skor+=1+bonus;skorBahagian[bahagian]++;playSfx('correct');
-    if(comboStreak>=5&&!badgesEarned.includes("Combo King"))badgesEarned.push("Combo King");
-    if(masaDiambil<3.0&&!badgesEarned.includes("Quick Thinker"))badgesEarned.push("Quick Thinker");
-    let msg=`✔ Betul! +${1+bonus} mata`;if(comboStreak>=3)msg+=` | 🔥x${comboStreak}`;
-    if(!modeExam)setStatus('solo-status',msg,'status-ok');
-    if(comboStreak%LEVEL_UP_THRESHOLD===0&&currentLevel<3){currentLevel++;showLevelPopup(`⬆️ Level Naik! Level ${currentLevel}`);}
+function doOk(e){
+  playSfx(sfxOk);let bonus=0;
+  if(G.mode==='solo'){
+    G.combo++;G.ws=0;bonus=G.combo>=3?LV[G.lv].b:0;G.skor+=1+bonus;
+    if(G.combo>=5&&!G.bdg.includes('Combo King'))G.bdg.push('Combo King');
+    if(e<3&&!G.bdg.includes('Quick Thinker'))G.bdg.push('Quick Thinker');
+    if(G.combo%4===0&&G.lv<3){G.lv++;showToast(`⬆️ Level Naik! L${G.lv}`);}
+    G.rekod.push({ok:true,t:e});
   }else{
-    comboStreak=0;wrongStreak++;nyawa--;playSfx('wrong');
-    const msg=timeout?'⏰ Masa Habis!':`❌ Salah! (Betul: ${currentAnswer})`;
-    if(!modeExam)setStatus('solo-status',`${msg} | ${getNyawaTeks(nyawa)}`,'status-salah');
-    if(wrongStreak>=LEVEL_DOWN_THRESHOLD&&currentLevel>1){currentLevel--;wrongStreak=0;showLevelPopup(`⬇️ Level Turun ke Level ${currentLevel}`);}
-    if(!modeExam)highlightButtons('btn',currentAnswer);
+    const p=G.players[G.cp];p.combo++;p.ws=0;bonus=p.combo>=3?LV[p.lv].b:0;p.skor+=1+bonus;
+    if(p.combo>=5&&!p.bdg.includes('Combo King'))p.bdg.push('Combo King');
+    if(e<3&&!p.bdg.includes('Quick Thinker'))p.bdg.push('Quick Thinker');
+    if(p.combo%4===0&&p.lv<3){p.lv++;showToast(`⬆️ ${p.emoji} L${p.lv}`);}
+    p.rekod.push({ok:true,t:e});
   }
-  document.getElementById('solo-nyawa').textContent=getNyawaTeks(nyawa);
-  document.getElementById('solo-combo').textContent=getComboTeks(comboStreak);
-  const lvEl=document.getElementById('solo-level');
-  lvEl.textContent=`📈 Level ${currentLevel}: ${LEVEL_CONFIG[currentLevel].nama}`;lvEl.style.background=LEVEL_CONFIG[currentLevel].color;
-  document.getElementById('solo-score').textContent=`Skor: ${skor}`;
-  rekodJawapan.push({soalan:document.getElementById('solo-question').textContent,user:jawapanUser,betul:currentAnswer,bah:bahagian,masa:masaDiambil});
-  document.getElementById('solo-progress').style.width=`${(soalanKeGlobal/SOALAN_PER_BAHAGIAN)*100}%`;
-  if(nyawa<=0){setTimeout(gameOver,1500);return;}setTimeout(soalanSeterusnya,1500);
+  if(!G.exam){const co=G.mode==='solo'?G.combo:G.players[G.cp].combo;const m=document.getElementById('g-msg');m.textContent=`✔ Betul! +${1+bonus}${co>=3?` 🔥x${co}`:''}`;m.className='g-status ok';}
+  updateUI();if(G.mode==='multi')renderLive();setTimeout(nextQ,1400);
 }
 
-function setStatus(id,msg,cls){const el=document.getElementById(id);el.textContent=msg;el.className=`status-txt ${cls}`;}
-
-function highlightButtons(prefix,jawapanBetul){
-  for(let i=0;i<4;i++){
-    const b=document.getElementById(`${prefix}-${i}`);if(!b)continue;
-    let bv=b.textContent.includes('.')?parseFloat(b.textContent):parseInt(b.textContent);
-    b.style.background=bv==jawapanBetul?'#B6FFB6':'#FFAAAA';
-    b.style.color=bv==jawapanBetul?'#155724':'#721c24';b.disabled=true;
+function doFail(ans,tout,e){
+  playSfx(sfxWrong);let ny;
+  if(G.mode==='solo'){
+    G.combo=0;G.ws++;G.nyawa--;ny=G.nyawa;
+    if(G.ws>=3&&G.lv>1){G.lv--;G.ws=0;showToast(`⬇️ Level Turun L${G.lv}`);}
+    G.rekod.push({ok:false,t:e});
+  }else{
+    const p=G.players[G.cp];p.combo=0;p.ws++;p.nyawa--;ny=p.nyawa;
+    if(p.ws>=3&&p.lv>1){p.lv--;p.ws=0;showToast(`⬇️ ${p.emoji} Level Turun`);}
+    p.rekod.push({ok:false,t:e});
   }
+  if(!G.exam){const m=document.getElementById('g-msg');m.textContent=(tout?'⏰ Masa Habis!':` ❌ Salah! (Betul: ${ans})`)+` ${'❤️'.repeat(ny)}`;m.className='g-status fail';}
+  updateUI();if(G.mode==='multi')renderLive();
+  if(ny<=0){if(G.mode==='multi')G.players[G.cp].over=true;setTimeout(()=>G.mode==='multi'?endTurn():gameOver(),1400);}
+  else setTimeout(nextQ,1400);
 }
 
 function gameOver(){
-  stopTimer();stopMusic();simpanLeaderboard();
-  document.getElementById('go-name').textContent=`${namaPemain}, nyawa anda habis!`;
-  document.getElementById('go-score').textContent=`Skor akhir: ${skor}`;
-  renderBadgeSummary('go-badges',badgesEarned);
-  setBg(0);showScreen('screen-gameover');
+  clearInterval(tid);stopMusic();saveLB();
+  document.getElementById('over-body').innerHTML=`<p style="font-size:16px;font-weight:800;color:#FF6B9D">${emo(G.name)} ${G.name}</p><p style="font-size:28px;font-weight:800;color:#00C9A7">Skor: ${G.skor}</p><p style="color:#EF4444;font-size:12px">Nyawa habis!</p>${bdgHtml(G.bdg)}<div class="row mt6"><button class="btn btn-pink" onclick="go('s-menu')">🔄 Cuba Lagi</button><button class="btn btn-purple" onclick="openLB()">🏆 Leaderboard</button></div>`;
+  go('s-over');
 }
 
-function checkAndAwardBadges(){
-  if(skorBahagian[bahagianDipilih]===SOALAN_PER_BAHAGIAN){
-    if(bahagianDipilih===1&&!badgesEarned.includes("Sifir Master"))badgesEarned.push("Sifir Master");
-    else if(bahagianDipilih===2&&!badgesEarned.includes("Unit Champion"))badgesEarned.push("Unit Champion");
-    else if(bahagianDipilih===3&&!badgesEarned.includes("Problem Solver"))badgesEarned.push("Problem Solver");
-  }
-  if(skor===SOALAN_PER_BAHAGIAN&&!badgesEarned.includes("Perfect Score"))badgesEarned.push("Perfect Score");
-  if(rekodJawapan.length>0){const avg=rekodJawapan.reduce((s,r)=>s+r.masa,0)/rekodJawapan.length;if(avg<5.0&&!badgesEarned.includes("Speed Genius"))badgesEarned.push("Speed Genius");}
-  if(nyawa===3&&!badgesEarned.includes("Survivor"))badgesEarned.push("Survivor");
-  if(currentLevel===3&&!badgesEarned.includes("Level Master"))badgesEarned.push("Level Master");
+function endSolo(){
+  clearInterval(tid);stopMusic();awardBdgSolo();saveLB();
+  const avg=G.rekod.length?(G.rekod.reduce((a,r)=>a+r.t,0)/G.rekod.length).toFixed(1):'—';
+  document.getElementById('tamat-body').innerHTML=`<p style="font-size:15px;font-weight:800;color:#FF6B9D">${emo(G.name)} ${G.name}</p><p style="font-size:30px;font-weight:800;color:#00C9A7">${G.skor} / ${QN}</p><p style="font-size:12px;color:#EF4444">Nyawa: ${'❤️'.repeat(G.nyawa)}</p><p style="font-size:12px;color:#0EA5E9">⏱ Purata: ${avg}s</p><p style="font-size:12px;font-weight:800;color:#1E3A5F">📈 Level: ${G.lv} (${LV[G.lv].n})</p>${bdgHtml(G.bdg)}<div class="row mt6"><button class="btn btn-teal" onclick="go('s-menu')">🏠 Menu</button><button class="btn btn-purple" onclick="openLB()">🏆 Leaderboard</button></div>`;
+  go('s-tamat');
 }
 
-function tamatPermainan(){
-  stopTimer();stopMusic();checkAndAwardBadges();simpanLeaderboard();
-  const namaBah={1:"Sifir",2:"Tukar Unit",3:"Masalah Matematik"};
-  document.getElementById('tamat-name-score').textContent=`${namaPemain}, skor: ${skor}/${SOALAN_PER_BAHAGIAN}`;
-  document.getElementById('tamat-bahagian').textContent=`Bahagian ${bahagianDipilih}: ${namaBah[bahagianDipilih]}`;
-  document.getElementById('tamat-nyawa').textContent=`Nyawa berbaki: ${getNyawaTeks(nyawa)}`;
-  if(rekodJawapan.length>0){const avg=rekodJawapan.reduce((s,r)=>s+r.masa,0)/rekodJawapan.length;document.getElementById('tamat-avg').textContent=`⏱ Purata masa: ${avg.toFixed(1)}s`;}
-  document.getElementById('tamat-level').textContent=`📈 Level terakhir: ${currentLevel} (${LEVEL_CONFIG[currentLevel].nama})`;
-  renderBadgeSummary('tamat-badges',badgesEarned);setBg(0);showScreen('screen-tamat');
+function awardBdgSolo(){
+  const b=G.bdg;
+  if(G.skor===QN){if(G.bah===1&&!b.includes('Sifir Master'))b.push('Sifir Master');if(G.bah===2&&!b.includes('Unit Champion'))b.push('Unit Champion');if(G.bah===3&&!b.includes('Problem Solver'))b.push('Problem Solver');if(!b.includes('Perfect Score'))b.push('Perfect Score');}
+  if(G.rekod.length){const avg=G.rekod.reduce((a,r)=>a+r.t,0)/G.rekod.length;if(avg<5&&!b.includes('Speed Genius'))b.push('Speed Genius');}
+  if(G.nyawa===MAXNYAWA&&!b.includes('Survivor'))b.push('Survivor');
+  if(G.lv===3&&!b.includes('Level Master'))b.push('Level Master');
 }
 
-function renderBadgeSummary(containerId,badges){
-  const el=document.getElementById(containerId);
-  if(badges.length===0){el.innerHTML='<p style="font-size:11px;color:#aaa;text-align:center;">(Tiada badge diperoleh)</p>';return;}
-  let html='<div class="result-card"><p style="font-size:12px;font-weight:bold;color:#7C3AED;margin-bottom:6px;">🏆 Badge Diperoleh:</p>';
-  for(const bn of badges){const info=BADGE_LIST[bn]||{};html+=`<div style="font-size:11px;color:#6D28D9;margin:2px 0;">${info.icon||'🏅'} <b>${bn}</b> — ${info.desc||''}</div>`;}
-  html+='</div>';el.innerHTML=html;
+function endTurn(){
+  clearInterval(tid);const p=G.players[G.cp];
+  if(p.skor===QN&&!p.bdg.includes('Perfect Score'))p.bdg.push('Perfect Score');
+  if(p.nyawa===MAXNYAWA&&!p.bdg.includes('Survivor'))p.bdg.push('Survivor');
+  if(p.lv===3&&!p.bdg.includes('Level Master'))p.bdg.push('Level Master');
+  if(p.rekod.length){const avg=p.rekod.reduce((a,r)=>a+r.t,0)/p.rekod.length;if(avg<5&&!p.bdg.includes('Speed Genius'))p.bdg.push('Speed Genius');}
+  if(G.bah===1&&p.skor===QN&&!p.bdg.includes('Sifir Master'))p.bdg.push('Sifir Master');
+  if(G.bah===2&&p.skor===QN&&!p.bdg.includes('Unit Champion'))p.bdg.push('Unit Champion');
+  if(G.bah===3&&p.skor===QN&&!p.bdg.includes('Problem Solver'))p.bdg.push('Problem Solver');
+  G.cp++;if(G.cp>=G.players.length){saveLB();showWinner();}else showTurn();
 }
 
-function showRecords(){
-  const el=document.getElementById('records-content');
-  if(rekodJawapan.length===0){el.innerHTML='<p>Tiada rekod.</p>';showModal('modal-records');return;}
-  let html='<table class="records-table"><thead><tr><th>#</th><th>Soalan</th><th>Jwp</th><th>Betul</th><th>Masa</th></tr></thead><tbody>';
-  rekodJawapan.forEach((r,i)=>{const ok=r.user==r.betul?'✔':'❌';html+=`<tr><td>${i+1}</td><td style="max-width:160px;">${r.soalan}</td><td>${r.user}</td><td>${ok} ${r.betul}</td><td>${r.masa.toFixed(1)}s</td></tr>`;});
-  html+='</tbody></table>';el.innerHTML=html;showModal('modal-records');
-}
-
-// MULTIPLAYER
-function mulaMultiplayer(bah){
-  const names=playerEntries.map(e=>e.value.trim());
-  if(names.some(n=>n==='')){alert("Sila isi semua nama pemain!");return;}
-  if(new Set(names).size!==names.length){alert("Nama pemain mestilah berbeza!");return;}
-  modeExam=document.getElementById('exam-mode-mp').checked;
-  modeMultiplayer=true;bahagian=bah;bahagianDipilih=bah;
-  senaraipemain=names.map(nama=>({nama,emoji:getEmojiForName(nama),skor:0,nyawa:3,combo:0,level:1,wrong_streak:0,rekod:[],badges:[],game_over:false}));
-  pemainSemasaIdx=0;startMusic();paparanGiliranMula();
-}
-
-function paparanGiliranMula(){
-  const p=senaraipemain[pemainSemasaIdx];
-  const idx=pemainSemasaIdx;
-  const bgClr=PLAYER_BG_COLORS[idx%PLAYER_BG_COLORS.length];
-  const bdClr=PLAYER_BORDER_COLORS[idx%PLAYER_BORDER_COLORS.length];
-  document.getElementById('giliran-card').style.background=bgClr;
-  document.getElementById('giliran-card').style.borderColor=bdClr;
-  document.getElementById('giliran-emoji').textContent=p.emoji;
-  document.getElementById('giliran-name').textContent=`Giliran: ${p.nama}`;
-  document.getElementById('giliran-info').textContent=`Skor semasa: ${p.skor} | ${getNyawaTeks(p.nyawa)}`;
-  document.getElementById('giliran-scores').textContent=senaraipemain.map(x=>`${x.emoji}${x.nama.slice(0,4)}: ${x.skor}`).join('   ');
-  document.getElementById('giliran-start-btn').style.background=bdClr;
-  document.getElementById('giliran-start-btn').textContent=`▶ Mula Giliran ${p.emoji} ${p.nama}`;
-  setBg(bahagian);showScreen('screen-giliran');
-}
-
-function mulaGiliranPemain(){soalanKeGlobal=0;binaQueueSoalan(bahagian);renderMPUI();soalanSeterusnya();}
-
-function renderMPUI(){
-  const p=senaraipemain[pemainSemasaIdx];
-  const bgClr=PLAYER_BG_COLORS[pemainSemasaIdx%PLAYER_BG_COLORS.length];
-  setBg(bahagian);
-  document.getElementById('mp-top-bar').style.background=bgClr+'cc';
-  document.getElementById('mp-player-label').textContent=`${p.emoji} Giliran: ${p.nama}`;
-  document.getElementById('mp-status-bar').style.background=bgClr+'cc';
-  kemaskiniLiveSkor();showScreen('screen-soalan-mp');
-}
-
-function renderSoalanMP(teks,choices,lv){
-  const p=senaraipemain[pemainSemasaIdx];
-  document.getElementById('mp-section-label').textContent=`Bahagian ${bahagian}: ${getBahagianName(bahagian)}`;
-  document.getElementById('mp-qnum').textContent=`Soalan ${soalanKeGlobal}/${SOALAN_PER_BAHAGIAN}`;
-  document.getElementById('mp-question').textContent=teks;
-  document.getElementById('mp-status').textContent='';
-  document.getElementById('mp-score').textContent=`Skor: ${p.skor}`;
-  document.getElementById('mp-nyawa').textContent=getNyawaTeks(p.nyawa);
-  document.getElementById('mp-combo').textContent=getComboTeks(p.combo);
-  const lvEl=document.getElementById('mp-level');lvEl.textContent=`📈 L${lv}:${LEVEL_CONFIG[lv].nama}`;lvEl.style.background=LEVEL_CONFIG[lv].color;
-  for(let i=0;i<4;i++){const b=document.getElementById(`mp-btn-${i}`);b.textContent=String(choices[i]);b.style.background=BTN_COLORS[i];b.style.color='white';b.disabled=false;}
-  document.getElementById('mp-progress').style.width=`${((soalanKeGlobal-1)/SOALAN_PER_BAHAGIAN)*100}%`;
-}
-
-function semakJawapanMP(jawapanUser,betul,timeout){
-  const p=senaraipemain[pemainSemasaIdx];
-  if(betul){
-    p.combo++;p.wrong_streak=0;const bonus=p.combo>=3?LEVEL_CONFIG[p.level].bonus_combo:0;p.skor+=1+bonus;playSfx('correct');
-    if(p.combo>=5&&!p.badges.includes("Combo King"))p.badges.push("Combo King");
-    if(masaDiambil<3.0&&!p.badges.includes("Quick Thinker"))p.badges.push("Quick Thinker");
-    let msg=`✔ Betul! +${1+bonus} mata`;if(p.combo>=3)msg+=` | 🔥x${p.combo}`;
-    if(!modeExam)setStatus('mp-status',msg,'status-ok');
-    if(p.combo%LEVEL_UP_THRESHOLD===0&&p.level<3){p.level++;showLevelPopup(`⬆️ ${p.emoji} Level Naik! Level ${p.level}`);}
-  }else{
-    p.combo=0;p.wrong_streak++;p.nyawa--;playSfx('wrong');
-    const msg=timeout?'⏰ Masa Habis!':`❌ Salah! (Betul: ${currentAnswer})`;
-    if(!modeExam)setStatus('mp-status',`${msg} | ${getNyawaTeks(p.nyawa)}`,'status-salah');
-    if(p.wrong_streak>=LEVEL_DOWN_THRESHOLD&&p.level>1){p.level--;p.wrong_streak=0;showLevelPopup(`⬇️ ${p.emoji} Level Turun ke Level ${p.level}`);}
-    if(!modeExam)highlightButtons('mp-btn',currentAnswer);
-  }
-  document.getElementById('mp-nyawa').textContent=getNyawaTeks(p.nyawa);
-  document.getElementById('mp-combo').textContent=getComboTeks(p.combo);
-  const lvEl=document.getElementById('mp-level');lvEl.textContent=`📈 L${p.level}:${LEVEL_CONFIG[p.level].nama}`;lvEl.style.background=LEVEL_CONFIG[p.level].color;
-  document.getElementById('mp-score').textContent=`Skor: ${p.skor}`;
-  document.getElementById('mp-progress').style.width=`${(soalanKeGlobal/SOALAN_PER_BAHAGIAN)*100}%`;
-  kemaskiniLiveSkor();
-  p.rekod.push({soalan:document.getElementById('mp-question').textContent,user:jawapanUser,betul:currentAnswer,bah:bahagian,masa:masaDiambil});
-  if(p.nyawa<=0){p.game_over=true;setTimeout(tamatGiliranPemain,1500);return;}setTimeout(soalanSeterusnya,1500);
-}
-
-function kemaskiniLiveSkor(){
-  const el=document.getElementById('live-scoreboard');
-  const sorted=[...senaraipemain.entries()].sort((a,b)=>b[1].skor-a[1].skor);
-  let html='';
-  sorted.forEach(([origIdx,px],rank)=>{
-    const isCurrent=origIdx===pemainSemasaIdx;
-    const bgClr=PLAYER_BG_COLORS[origIdx%PLAYER_BG_COLORS.length];
-    const bdClr=PLAYER_BORDER_COLORS[origIdx%PLAYER_BORDER_COLORS.length];
-    const medal=rank<3?MEDALS[rank]:`${rank+1}.`;
-    const nyawaTxt=px.game_over?'💀':'❤'.repeat(px.nyawa);
-    html+=`<div class="live-row${isCurrent?' current':''}" style="background:${bgClr};${isCurrent?`border-color:${bdClr};`:''}"><div class="live-name">${medal}${px.emoji}${px.nama.slice(0,6)}</div><div class="live-score" style="color:${bdClr}">${px.skor}pts  ${nyawaTxt}</div></div>`;
-  });
-  el.innerHTML=html;
-}
-
-function tamatGiliranPemain(){
-  stopTimer();const p=senaraipemain[pemainSemasaIdx];
-  if(p.skor===SOALAN_PER_BAHAGIAN&&!p.badges.includes("Perfect Score"))p.badges.push("Perfect Score");
-  if(p.nyawa===3&&!p.badges.includes("Survivor"))p.badges.push("Survivor");
-  if(p.level===3&&!p.badges.includes("Level Master"))p.badges.push("Level Master");
-  if(p.rekod.length>0){
-    const avg=p.rekod.reduce((s,r)=>s+r.masa,0)/p.rekod.length;
-    if(avg<5.0&&!p.badges.includes("Speed Genius"))p.badges.push("Speed Genius");
-    if(bahagianDipilih===1&&p.skor===SOALAN_PER_BAHAGIAN&&!p.badges.includes("Sifir Master"))p.badges.push("Sifir Master");
-    if(bahagianDipilih===2&&p.skor===SOALAN_PER_BAHAGIAN&&!p.badges.includes("Unit Champion"))p.badges.push("Unit Champion");
-    if(bahagianDipilih===3&&p.skor===SOALAN_PER_BAHAGIAN&&!p.badges.includes("Problem Solver"))p.badges.push("Problem Solver");
-  }
-  pemainSemasaIdx++;
-  if(pemainSemasaIdx>=senaraipemain.length){simpanLeaderboard();paparanPemenang();}else paparanGiliranMula();
-}
-
-function paparanPemenang(){
+function showWinner(){
   stopMusic();
-  const sorted=[...senaraipemain].sort((a,b)=>b.skor-a.skor);const winner=sorted[0];
-  const winIdx=senaraipemain.indexOf(winner);
-  document.getElementById('winner-card').style.borderColor=PLAYER_BORDER_COLORS[winIdx%PLAYER_BORDER_COLORS.length];
-  document.getElementById('winner-card').style.background=PLAYER_BG_COLORS[winIdx%PLAYER_BG_COLORS.length];
-  document.getElementById('winner-emoji-name').textContent=`${winner.emoji}  ${winner.nama}`;
-  document.getElementById('winner-score').textContent=`Skor: ${winner.skor} / ${SOALAN_PER_BAHAGIAN}`;
-  let ranksHTML='';
-  sorted.forEach((p,i)=>{
-    const origIdx=senaraipemain.indexOf(p);
-    const bgClr=PLAYER_BG_COLORS[origIdx%PLAYER_BG_COLORS.length];
-    const badgeIcons=p.badges.map(b=>BADGE_LIST[b]?.icon||'').join('');
-    ranksHTML+=`<div class="rank-row" style="background:${bgClr};"><span style="font-weight:bold;">${MEDALS[i]}  ${p.emoji} ${p.nama}</span><span>${p.skor}pts  ${getNyawaTeks(p.nyawa)}  ${badgeIcons}</span></div>`;
-  });
-  document.getElementById('all-ranks').innerHTML=ranksHTML;
-  const tie=document.getElementById('tie-notice');
-  tie.style.display=(sorted.length>1&&sorted[0].skor===sorted[1].skor)?'block':'none';
-  setBg(0);showScreen('screen-pemenang');
+  const sorted=[...G.players.map((p,i)=>({...p,_i:i}))].sort((a,b)=>b.skor-a.skor);
+  const win=sorted[0],winBd=PBD[win._i%PBD.length],M=['🥇','🥈','🥉'];
+  const rows=sorted.map((p,r)=>{const bg=PBG[p._i%PBG.length],bd=PBD[p._i%PBD.length];return `<div class="rank-row" style="background:${bg}"><span>${M[r]||r+1+'.'}</span><span style="font-size:18px">${p.emoji}</span><span class="rk-name">${p.name}</span><span class="rk-pts">${p.skor}pts</span><span>${'❤️'.repeat(p.nyawa)}</span><span>${p.bdg.map(b=>BADGES[b]?.i||'').join('')}</span></div>`;}).join('');
+  const tie=sorted.length>1&&sorted[0].skor===sorted[1].skor;
+  document.getElementById('win-body').innerHTML=`<div style="background:${winBd}22;border:3px solid ${winBd};border-radius:16px;padding:14px;text-align:center;margin-bottom:10px"><div style="font-size:56px">${win.emoji}</div><div style="font-size:13px;font-weight:800;color:#F59E0B">🥇 PEMENANG!</div><div style="font-family:'Fredoka One',cursive;font-size:22px;color:#1E3A5F">${win.name}</div><div style="color:#00C9A7;font-weight:800">${win.skor} / ${QN} pts</div></div><div style="border-radius:12px;overflow:hidden">${rows}</div>${tie?'<p style="text-align:center;font-weight:800;color:#F59E0B;margin:6px">🤝 Seri!</p>':''}<div class="row mt6"><button class="btn btn-green" onclick="go('s-menu')">🔄 Main Lagi</button><button class="btn btn-purple" onclick="openLB()">🏆 Leaderboard</button></div>`;
+  go('s-winner');
 }
 
-// LEADERBOARD
-function simpanLeaderboard(){
-  if(modeMultiplayer){for(const p of senaraipemain)leaderboard.push({nama:`${p.emoji}${p.nama}`,skor:p.skor,bahagian:bahagianDipilih,badges:p.badges});}
-  else{leaderboard.push({nama:namaPemain,skor,bahagian:bahagianDipilih,badges:badgesEarned});}
-  localStorage.setItem('sifirx_lb',JSON.stringify(leaderboard));
-  const lines=leaderboard.map(e=>`${e.nama},${e.skor},${e.bahagian},${(e.badges||[]).join('|')||'Tiada'}`);
-  const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='leaderboard.txt';a.click();URL.revokeObjectURL(a.href);
+function bdgHtml(bdg){
+  if(!bdg||!bdg.length)return '<p style="font-size:11px;color:#94A3B8;margin:5px 0">(Tiada badge)</p>';
+  return `<div class="badge-box"><div class="badge-ttl">🏆 Badge Diperoleh:</div>${bdg.map(b=>{const i=BADGES[b]||{i:'🏅',d:b};return `<div class="badge-item"><span>${i.i}</span><span><b>${b}</b> — ${i.d}</span></div>`;}).join('')}</div>`;
 }
 
-function showLeaderboard(){
-  const sorted=[...leaderboard].sort((a,b)=>b.skor-a.skor).slice(0,10);
-  const medals=["🥇","🥈","🥉"];
-  let html=sorted.length===0?'<p style="text-align:center;color:#aaa;">Tiada rekod lagi.</p>':'';
-  sorted.forEach((e,i)=>{
-    const medal=i<3?medals[i]:`${i+1}.`;
-    const badgeIcons=(e.badges||[]).map(b=>BADGE_LIST[b]?.icon||'').join('');
-    html+=`<div class="lb-row"><span>${medal} ${e.nama} — <b>${e.skor} pts</b> (Bhg ${e.bahagian}) ${badgeIcons}</span></div>`;
-  });
-  document.getElementById('lb-content').innerHTML=html;showModal('modal-leaderboard');
+function saveLB(){
+  let lb=JSON.parse(localStorage.getItem('bijak-lb')||'[]');
+  if(G.mode==='solo')lb.push({n:G.name,s:G.skor,b:G.bah,bdg:G.bdg});
+  else G.players.forEach(p=>lb.push({n:p.emoji+p.name,s:p.skor,b:G.bah,bdg:p.bdg}));
+  lb.sort((a,b2)=>b2.s-a.s);localStorage.setItem('bijak-lb',JSON.stringify(lb.slice(0,50)));
 }
-
-function showBadgeList(){
-  let html='<div class="badge-list">';
-  for(const[name,info]of Object.entries(BADGE_LIST)){html+=`<div class="badge-item"><span class="badge-icon">${info.icon}</span><div class="badge-info"><div class="badge-name">${name}</div><div class="badge-desc">${info.desc}</div></div></div>`;}
-  html+='</div>';document.getElementById('badge-list-content').innerHTML=html;showModal('modal-badge-list');
+function openLB(){
+  const lb=JSON.parse(localStorage.getItem('bijak-lb')||'[]'),M=['🥇','🥈','🥉'];
+  document.getElementById('lb-body').innerHTML=lb.length?lb.slice(0,10).map((e,i)=>`<div class="lb-row">${M[i]||i+1+'.'} <span class="lb-name">${e.n}</span><span class="lb-pts">${e.s}pts</span><span style="font-size:10px;color:#94A3B8">Bhg${e.b}</span><span>${(e.bdg||[]).map(b=>BADGES[b]?.i||'').join('')}</span></div>`).join(''):'<p style="text-align:center;color:#94A3B8">Tiada rekod lagi.</p>';
+  document.getElementById('m-lb').classList.add('on');
 }
-
-document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id);});});
+function openBadges(){
+  document.getElementById('bdg-body').innerHTML=Object.entries(BADGES).map(([n,i])=>`<div style="margin:7px 0"><div style="font-weight:800;font-size:13px">${i.i} ${n}</div><div style="font-size:11px;color:#64748B">${i.d}</div></div><hr>`).join('');
+  document.getElementById('m-bdg').classList.add('on');
+}
+function closeM(id){document.getElementById(id).classList.remove('on');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 </script>
 </body>
 </html>
