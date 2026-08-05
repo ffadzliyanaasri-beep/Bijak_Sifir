@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Permainan Bijak Sifir</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.ably.io/lib/ably.min.js"></script>
+<script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -619,7 +619,7 @@ async function ensureAbly(){
   if(!ABLY_KEY){showToast('⚠️ Sila masukkan Ably API Key dahulu (menu 🌐 Main Online)');return false;}
   if(ably&&ably.connection.state==='connected')return true;
   try{
-    ably=new Ably.Realtime.Promise({key:ABLY_KEY,echoMessages:true});
+    ably=new Ably.Realtime({key:ABLY_KEY,echoMessages:true});
     await ably.connection.once('connected');
     gchannel=ably.channels.get('bijaksifir-global-lb');
     return true;
