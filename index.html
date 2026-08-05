@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Permainan Bijak Sifir</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.ably.io/lib/ably.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -118,11 +119,13 @@ hr{border:none;border-top:1px solid #E5E7EB;margin:10px 0}
     <div class="pad">
       <div class="row" style="margin:10px 0 6px">
         <button class="btn btn-blue" onclick="go('s-solo')">👤 Solo</button>
-        <button class="btn btn-green" onclick="go('s-multi')">👥 Multiplayer</button>
+        <button class="btn btn-green" onclick="go('s-multi')">👥 Sama Skrin</button>
       </div>
+      <button class="btn btn-amber btn-full" onclick="go('s-online')">🌐 Main Online (Ably)</button>
       <div class="info-box">❤️ 10 Nyawa &nbsp;|&nbsp; 🔥 Combo &nbsp;|&nbsp; 📈 Level Auto &nbsp;|&nbsp; 🏆 Badge</div>
       <hr>
-      <button class="btn btn-purple btn-full" onclick="openLB()">🏆 Leaderboard</button>
+      <button class="btn btn-purple btn-full" onclick="openLB()">🏆 Leaderboard (Peranti Ini)</button>
+      <button class="btn btn-teal btn-full mt6" onclick="openGlobalLB()">🌐 Leaderboard Global</button>
       <button class="btn btn-grey btn-full mt6" onclick="openBadges()">📖 Senarai Badge</button>
     </div>
   </div>
@@ -173,6 +176,35 @@ hr{border:none;border-top:1px solid #E5E7EB;margin:10px 0}
       <button class="btn btn-grey btn-full mt6" onclick="go('s-menu')">← Balik</button>
     </div>
   </div>
+
+  <div id="s-online" class="screen">
+    <div class="hdr">🌐 Main Online (Ably)</div>
+    <div class="pad">
+      <div id="ably-key-wrap">
+        <label class="f-label">Ably API Key:</label>
+        <input type="text" id="ably-key-input" placeholder="Tampal API Key Ably di sini...">
+        <button class="btn btn-purple btn-full mt6" onclick="saveAblyKey()">💾 Simpan Kunci</button>
+        <p style="font-size:10px;color:#94A3B8;margin-top:6px">Dapatkan percuma di ably.com → Buat App → API Keys</p>
+        <hr>
+      </div>
+      <label class="f-label">Nama Pemain:</label>
+      <input type="text" id="online-name" placeholder="Masukkan nama anda...">
+      <hr>
+      <div style="font-weight:800;color:#A78BFA;font-size:13px;margin-bottom:6px">🏠 Buka Bilik (Host) — Pilih Bahagian:</div>
+      <div class="sec-btns">
+        <button class="sec-btn b1" onclick="hostRoom(1)">📐 Bahagian 1</button>
+        <button class="sec-btn b2" onclick="hostRoom(2)">📏 Bahagian 2</button>
+        <button class="sec-btn b3" onclick="hostRoom(3)">🧮 Bahagian 3</button>
+      </div>
+      <hr>
+      <div style="font-weight:800;color:#A78BFA;font-size:13px;margin-bottom:6px">🔑 Sertai Bilik:</div>
+      <input type="text" id="join-code" placeholder="Masukkan Kod Bilik (cth: ABC123)" style="text-transform:uppercase">
+      <button class="btn btn-blue btn-full mt6" onclick="joinRoom()">➡ Sertai Bilik</button>
+      <button class="btn btn-grey btn-full mt6" onclick="go('s-menu')">← Balik</button>
+    </div>
+  </div>
+
+  <div id="s-lobby" class="screen"><div class="hdr">🚪 Bilik Permainan</div><div id="lobby-body"></div></div>
 
   <div id="s-turn" class="screen"><div id="turn-body"></div></div>
 
@@ -239,6 +271,14 @@ hr{border:none;border-top:1px solid #E5E7EB;margin:10px 0}
   </div>
 </div>
 
+<div class="modal-bg" id="m-glb">
+  <div class="modal-box">
+    <div class="modal-ttl">🌐 Leaderboard Global</div>
+    <div id="glb-body"></div>
+    <button class="btn btn-grey btn-full mt6" onclick="closeM('m-glb')">Tutup</button>
+  </div>
+</div>
+
 <script>
 const FILES={
   mainBg:'main background.jpg',
@@ -295,8 +335,8 @@ initMP();
 function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  if(['s-menu','s-solo','s-multi','s-over','s-tamat','s-winner'].includes(id))setBg(FILES.mainBg);
-  if(id==='s-menu')stopMusic();
+  if(['s-menu','s-solo','s-multi','s-online','s-lobby','s-over','s-tamat','s-winner'].includes(id))setBg(FILES.mainBg);
+  if(id==='s-menu'){stopMusic();if(document.getElementById('ably-key-wrap'))document.getElementById('ably-key-wrap').style.display=ABLY_KEY?'none':'block';}
 }
 function emo(n){let s=0;for(let c of n)s+=c.charCodeAt(0);return EMOJIS[s%EMOJIS.length];}
 
@@ -338,11 +378,12 @@ function beginTurn(){
 }
 
 function renderLive(){
-  if(G.mode!=='multi')return;
+  if(G.mode!=='multi'&&G.mode!=='online')return;
   const sorted=[...G.players.map((p,i)=>({...p,_i:i}))].sort((a,b)=>b.skor-a.skor);
   const M=['🥇','🥈','🥉'];
   document.getElementById('live-body').innerHTML=sorted.map((p,r)=>{
-    const bg=PBG[p._i%PBG.length],bd=PBD[p._i%PBD.length],ic=p._i===G.cp;
+    const bg=PBG[p._i%PBG.length],bd=PBD[p._i%PBD.length];
+    const ic=G.mode==='multi'?p._i===G.cp:p.name===ROOM.myName;
     const nw=p.over?'💀':'❤'.repeat(p.nyawa);
     return `<div class="live-row ${ic?'cur':''}" style="background:${bg};border:2px solid ${ic?bd:'transparent'}">
       <div class="lr-top"><span>${M[r]||r+1+'.'}</span><span>${p.emoji}</span>
@@ -360,6 +401,10 @@ function renderTopBar(){
       <div style="margin-left:auto;display:flex;gap:4px">
         <button class="btn btn-grey btn-sm" onclick="openLB()">🏆</button>
         <button class="btn btn-grey btn-sm" onclick="go('s-menu')">Menu</button></div>`;
+  }else if(G.mode==='online'){
+    el.innerHTML=`<div style="background:#F59E0B;color:white;padding:3px 10px;border-radius:8px;font-weight:800;font-size:12px">${emo(ROOM.myName)} ${ROOM.myName}</div>
+      <span style="font-size:10px;color:#64748B">Bilik ${ROOM.code}</span>
+      <div style="margin-left:auto"><button class="btn btn-grey btn-sm" onclick="leaveGameToMenu()">✕</button></div>`;
   }else{
     const p=G.players[G.cp],bd=PBD[G.cp%PBD.length];
     el.innerHTML=`<div style="background:${bd};color:white;padding:3px 10px;border-radius:8px;font-weight:800;font-size:12px">${p.emoji} ${p.name}</div>
@@ -368,18 +413,20 @@ function renderTopBar(){
   }
 }
 
+function myP(){return (G.players||[]).find(p=>p.name===ROOM.myName);}
+
 function updateUI(){
-  const ny=G.mode==='solo'?G.nyawa:G.players[G.cp].nyawa;
-  const co=G.mode==='solo'?G.combo:G.players[G.cp].combo;
-  const lv=G.mode==='solo'?G.lv:G.players[G.cp].lv;
-  const sk=G.mode==='solo'?G.skor:G.players[G.cp].skor;
-  document.getElementById('g-nyawa').textContent='❤️'.repeat(ny);
+  let ny,co,lv,sk;
+  if(G.mode==='online'){const p=myP()||{nyawa:MAXNYAWA,combo:0,skor:0};ny=p.nyawa;co=p.combo;lv=ROOM.lv;sk=p.skor;}
+  else if(G.mode==='solo'){ny=G.nyawa;co=G.combo;lv=G.lv;sk=G.skor;}
+  else{ny=G.players[G.cp].nyawa;co=G.players[G.cp].combo;lv=G.players[G.cp].lv;sk=G.players[G.cp].skor;}
+  document.getElementById('g-nyawa').textContent='❤️'.repeat(Math.max(0,ny));
   document.getElementById('g-combo').textContent=co===0?'🔥 —':co<3?`🔥 x${co}`:`🔥🔥 x${co}!`;
   const lel=document.getElementById('g-lv');lel.textContent=`📈 L${lv} ${LV[lv].n}`;lel.style.background=LV[lv].bg;
   document.getElementById('g-skor').textContent=`Skor: ${sk}`;
 }
 
-function clv(){return G.mode==='solo'?G.lv:G.players[G.cp].lv;}
+function clv(){return G.mode==='online'?ROOM.lv:(G.mode==='solo'?G.lv:G.players[G.cp].lv);}
 function ri(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function shuf(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
 
@@ -553,6 +600,206 @@ function openBadges(){
 }
 function closeM(id){document.getElementById(id).classList.remove('on');}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+/* ========== ABLY: Online Multiplayer + Global Leaderboard ========== */
+let ABLY_KEY=localStorage.getItem('ably-key')||'';
+let ably=null, channel=null, gchannel=null;
+let ROOM={code:'',isHost:false,myName:'',lv:1,qi:0,ans:null,answers:{},t0:0,myAnswered:false};
+
+function saveAblyKey(){
+  const k=document.getElementById('ably-key-input').value.trim();
+  if(!k){showToast('⚠️ Sila masukkan Ably API Key');return;}
+  ABLY_KEY=k;localStorage.setItem('ably-key',k);
+  document.getElementById('ably-key-wrap').style.display='none';
+  showToast('✅ Kunci Ably disimpan');
+}
+function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=c[ri(0,c.length-1)];return s;}
+
+async function ensureAbly(){
+  if(!ABLY_KEY){showToast('⚠️ Sila masukkan Ably API Key dahulu (menu 🌐 Main Online)');return false;}
+  if(ably&&ably.connection.state==='connected')return true;
+  try{
+    ably=new Ably.Realtime.Promise({key:ABLY_KEY,echoMessages:true});
+    await ably.connection.once('connected');
+    gchannel=ably.channels.get('bijaksifir-global-lb');
+    return true;
+  }catch(err){showToast('❌ Gagal sambung Ably — semak API Key');ably=null;return false;}
+}
+
+async function hostRoom(bah){
+  const nm=document.getElementById('online-name').value.trim();
+  if(!nm){showToast('⚠️ Sila masukkan nama!');return;}
+  if(!(await ensureAbly()))return;
+  ROOM={code:genCode(),isHost:true,myName:nm,lv:1,qi:0,ans:null,answers:{},myAnswered:false};
+  G.mode='online';G.bah=bah;G.exam=false;
+  G.players=[{name:nm,emoji:emo(nm),skor:0,nyawa:MAXNYAWA,combo:0,lv:1,ws:0,rekod:[],bdg:[],over:false}];
+  channel=ably.channels.get('bijaksifir-room-'+ROOM.code);
+  channel.subscribe('join',msg=>{
+    const{name}=msg.data;
+    if(!G.players.find(p=>p.name===name))G.players.push({name,emoji:emo(name),skor:0,nyawa:MAXNYAWA,combo:0,lv:1,ws:0,rekod:[],bdg:[],over:false});
+    channel.publish('players',{players:G.players,bah:G.bah});
+    renderLobby();
+  });
+  channel.subscribe('question',msg=>onOnlineQuestion(msg.data));
+  channel.subscribe('result',msg=>onOnlineResult(msg.data));
+  channel.subscribe('gameover',msg=>onOnlineGameOver(msg.data));
+  channel.subscribe('answer',msg=>{
+    if(!ROOM.isHost||msg.data.qi!==ROOM.qi)return;
+    ROOM.answers[msg.data.name]=msg.data;
+    const active=G.players.filter(p=>!p.over).length;
+    if(Object.keys(ROOM.answers).length>=active)hostResolveRound();
+  });
+  renderLobby();go('s-lobby');
+}
+
+async function joinRoom(){
+  const nm=document.getElementById('online-name').value.trim();
+  const code=document.getElementById('join-code').value.trim().toUpperCase();
+  if(!nm||!code){showToast('⚠️ Sila isi nama & kod bilik!');return;}
+  if(!(await ensureAbly()))return;
+  ROOM={code,isHost:false,myName:nm,lv:1,qi:0,ans:null,answers:{},myAnswered:false};
+  G.mode='online';G.exam=false;G.players=[];
+  channel=ably.channels.get('bijaksifir-room-'+code);
+  channel.subscribe('players',msg=>{G.players=msg.data.players;if(msg.data.bah)G.bah=msg.data.bah;renderLobby();});
+  channel.subscribe('question',msg=>onOnlineQuestion(msg.data));
+  channel.subscribe('result',msg=>onOnlineResult(msg.data));
+  channel.subscribe('gameover',msg=>onOnlineGameOver(msg.data));
+  channel.subscribe('start',()=>{ROOM.lv=1;go('s-game');document.getElementById('live-panel').classList.add('show');renderLive();});
+  channel.publish('join',{name:nm});
+  renderLobby();go('s-lobby');
+}
+
+function renderLobby(){
+  document.getElementById('lobby-body').innerHTML=`<div class="pad" style="text-align:center">
+    <div style="font-size:12px;color:#64748B;font-weight:700">Kod Bilik</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:38px;color:#7C3AED;letter-spacing:4px;margin:6px 0">${ROOM.code}</div>
+    <div style="font-size:11px;color:#94A3B8;margin-bottom:10px">Kongsi kod ini dengan pemain lain</div>
+    <div class="p-list" style="max-height:180px">${(G.players||[]).map(p=>`<div class="p-row"><span class="p-emoji">${p.emoji}</span><span style="font-weight:700">${p.name}</span></div>`).join('')}</div>
+    ${ROOM.isHost?`<button class="btn btn-green btn-full mt6" onclick="startOnlineGame()">▶ Mula Permainan</button>`:`<p style="font-size:12px;color:#94A3B8;margin-top:10px">⏳ Menunggu host mula permainan...</p>`}
+    <button class="btn btn-grey btn-full mt6" onclick="leaveRoom()">← Keluar Bilik</button>
+  </div>`;
+}
+function leaveRoom(){if(channel){channel.unsubscribe();try{channel.detach();}catch(e){}}channel=null;go('s-online');}
+function leaveGameToMenu(){clearInterval(tid);if(channel){channel.unsubscribe();try{channel.detach();}catch(e){}}channel=null;go('s-menu');}
+
+function startOnlineGame(){
+  if(G.players.length<2){showToast('⚠️ Perlu sekurang-kurangnya 2 pemain untuk mula!');return;}
+  channel.publish('start',{});
+  ROOM.qi=0;ROOM.lv=1;
+  go('s-game');document.getElementById('live-panel').classList.add('show');renderLive();
+  hostNextQuestion();
+}
+
+function hostNextQuestion(){
+  ROOM.qi++;
+  if(ROOM.qi>QN){hostEndGame();return;}
+  ROOM.answers={};
+  const q=genQ();ROOM.ans=q.a;
+  channel.publish('question',{qi:ROOM.qi,text:q.t,choices:q.c,lv:ROOM.lv});
+}
+
+function onOnlineQuestion(data){
+  ROOM.qi=data.qi;ROOM.lv=data.lv;ROOM.myAnswered=false;ROOM.t0=Date.now();
+  renderTopBar();updateUI();renderLive();
+  const BN={1:'Sifir',2:'Tukar Unit',3:'Masalah Matematik'};
+  document.getElementById('g-sec').textContent=`Bahagian ${G.bah}: ${BN[G.bah]}`;
+  document.getElementById('g-qnum').textContent=`Soalan ${data.qi}/${QN}`;
+  document.getElementById('g-q').textContent=data.text;
+  document.getElementById('g-msg').textContent='';document.getElementById('g-msg').className='g-status';
+  document.getElementById('g-prog').style.width=`${(data.qi-1)/QN*100}%`;
+  const grid=document.getElementById('g-ans');grid.innerHTML='';
+  data.choices.forEach((c,i)=>{const b=document.createElement('button');b.className='ans-btn';b.style.background=BTNS[i];b.textContent=c;b.onclick=()=>submitOnlineAnswer(c);grid.appendChild(b);});
+  startOnlineTimer(data.lv);
+}
+
+function startOnlineTimer(lv){
+  clearInterval(tid);const lim=LV[lv].t;
+  tid=setInterval(()=>{
+    const el=document.getElementById('g-timer');if(!el){clearInterval(tid);return;}
+    const e=(Date.now()-ROOM.t0)/1000;
+    el.textContent=`⏱ ${e.toFixed(1)}s`;el.className=e>=lim-5?'timer warn':'timer';
+    if(e>=lim){
+      clearInterval(tid);
+      if(!ROOM.myAnswered)submitOnlineAnswer(null);
+      if(ROOM.isHost)hostResolveRound();
+    }
+  },100);
+}
+
+function submitOnlineAnswer(val){
+  if(ROOM.myAnswered)return;ROOM.myAnswered=true;
+  const e=(Date.now()-ROOM.t0)/1000;
+  document.querySelectorAll('.ans-btn').forEach(b=>b.disabled=true);
+  document.getElementById('g-msg').textContent='⏳ Menunggu pemain lain...';document.getElementById('g-msg').className='g-status';
+  channel.publish('answer',{name:ROOM.myName,val,t:e,qi:ROOM.qi});
+}
+
+function hostResolveRound(){
+  clearInterval(tid);const ans=ROOM.ans,results={};
+  G.players.forEach(p=>{
+    if(p.over)return;
+    const a=ROOM.answers[p.name];
+    const ok=a&&a.val!==null&&parseFloat(a.val)===parseFloat(ans);
+    if(ok){p.combo++;p.ws=0;const bonus=p.combo>=3?LV[ROOM.lv].b:0;p.skor+=1+bonus;p.rekod.push({ok:true,t:a.t});}
+    else{p.combo=0;p.ws++;p.nyawa--;if(p.nyawa<=0)p.over=true;p.rekod.push({ok:false,t:a?a.t:LV[ROOM.lv].t});}
+    results[p.name]={ok,val:a?a.val:null};
+  });
+  const numOk=Object.values(results).filter(r=>r.ok).length,total=Object.keys(results).length||1;
+  if(numOk/total>=0.6&&ROOM.lv<3)ROOM.lv++;else if(numOk/total<=0.3&&ROOM.lv>1)ROOM.lv--;
+  channel.publish('result',{qi:ROOM.qi,ans,results,players:G.players,lv:ROOM.lv});
+  setTimeout(()=>{if(G.players.every(p=>p.over))hostEndGame();else hostNextQuestion();},1600);
+}
+
+function onOnlineResult(data){
+  G.players=data.players;ROOM.lv=data.lv;
+  const myR=data.results[ROOM.myName];
+  document.querySelectorAll('.ans-btn').forEach(b=>{
+    b.disabled=true;
+    if(parseFloat(b.textContent)===parseFloat(data.ans))b.classList.add('correct');
+    else if(myR&&myR.val!==null&&parseFloat(b.textContent)===parseFloat(myR.val))b.classList.add('wrong');
+  });
+  if(myR){
+    document.getElementById('g-msg').textContent=myR.ok?'✔ Betul!':'❌ Salah!';
+    document.getElementById('g-msg').className='g-status '+(myR.ok?'ok':'fail');
+    if(!G.exam)playSfx(myR.ok?sfxOk:sfxWrong);
+  }
+  updateUI();renderLive();
+}
+
+function hostEndGame(){
+  G.players.forEach(p=>{
+    if(p.skor===QN&&!p.bdg.includes('Perfect Score'))p.bdg.push('Perfect Score');
+    if(p.nyawa===MAXNYAWA&&!p.bdg.includes('Survivor'))p.bdg.push('Survivor');
+    if(ROOM.lv===3&&!p.bdg.includes('Level Master'))p.bdg.push('Level Master');
+  });
+  channel.publish('gameover',{players:G.players});
+  finishOnlineGame(G.players);
+}
+function onOnlineGameOver(data){finishOnlineGame(data.players);}
+function finishOnlineGame(players){
+  clearInterval(tid);G.players=players;
+  pushGlobalLB(players,G.bah);
+  showWinner();
+}
+
+function pushGlobalLB(players,bah){
+  if(!gchannel)return;
+  players.forEach(p=>{gchannel.publish('score',{n:`${p.emoji} ${p.name}`,s:p.skor,b:bah,bdg:p.bdg,ts:Date.now()}).catch(()=>{});});
+}
+
+async function openGlobalLB(){
+  document.getElementById('glb-body').innerHTML='<p style="text-align:center;color:#94A3B8">Memuatkan...</p>';
+  document.getElementById('m-glb').classList.add('on');
+  if(!(await ensureAbly())){document.getElementById('glb-body').innerHTML='<p style="text-align:center;color:#94A3B8">Sambungkan Ably dahulu (masukkan API Key di menu 🌐 Main Online).</p>';return;}
+  try{
+    const page=await gchannel.history({limit:100,direction:'backwards'});
+    const items=page.items.map(m=>m.data).sort((a,b)=>b.s-a.s);
+    const M=['🥇','🥈','🥉'];
+    document.getElementById('glb-body').innerHTML=items.length?items.slice(0,10).map((e,i)=>`<div class="lb-row">${M[i]||i+1+'.'} <span class="lb-name">${e.n}</span><span class="lb-pts">${e.s}pts</span><span style="font-size:10px;color:#94A3B8">Bhg${e.b}</span></div>`).join(''):'<p style="text-align:center;color:#94A3B8">Tiada rekod global lagi.</p>';
+  }catch(err){
+    document.getElementById('glb-body').innerHTML='<p style="text-align:center;color:#DC2626;font-size:12px">❌ Gagal muat. Pastikan "Persist all messages" diaktifkan untuk channel di Ably dashboard.</p>';
+  }
+}
 </script>
 </body>
 </html>
